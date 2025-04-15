@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\GR\BlackHole_STD\build\CMakeFiles\c8d60a9dd23b15505928b7f22e11aba9\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{7B493E52-2DCB-387A-9C30-B4855CC6CED0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
