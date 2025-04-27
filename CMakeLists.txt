@@ -18,9 +18,30 @@ endif()
 
 set(FRAMEWORK2D_DIR "${PROJECT_SOURCE_DIR}")
 set(INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
-set(THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third_party")
+set(EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/external")
 set(BINARY_DIR "${PROJECT_SOURCE_DIR}/bin")
 set(LIBRARY_DIR "${PROJECT_SOURCE_DIR}/libs")
 
 add_subdirectory(src)
-add_subdirectory(third_party)
+add_subdirectory(external)
+
+#Find OpenGL 
+find_package(OpenGL REQUIRED)
+if (NOT OpenGL_FOUND)
+    message(FATAL_ERROR "OpenGL not found")
+endif()
+
+message(STATUS "OpenGL found: ${OPENGL_INCLUDE_DIR}")
+include_directories(${OPENGL_INCLUDE_DIR})
+message(STATUS "OpenGL found: ${OPENGL_LIBRARIES}")
+link_directories(${OPENGL_LIBRARIES})
+message(STATUS "OpenGL found: ${OPENGL_gl_LIBRARY}")
+link_directories(${OPENGL_gl_LIBRARY})
+
+
+#Add GLFW Submodule
+add_subdirectory(external/glfw)
+#Link GLFW to the project
+#target_link_libraries(IO_TEST OpenGL::GL glfw)
+target_link_libraries(WINDOW_TEST OpenGL::GL glfw)
+
