@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -28,6 +29,15 @@ int main() {
 
     // 设置当前上下文
     glfwMakeContextCurrent(window);
+
+    // 初始化 GLAD
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
+    // 输出 OpenGL 版本
+    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
     // 设置窗口大小回调
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);

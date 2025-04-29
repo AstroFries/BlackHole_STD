@@ -40,8 +40,10 @@ link_directories(${OPENGL_gl_LIBRARY})
 
 
 #Add GLFW Submodule
-add_subdirectory(external/glfw)
+
 #Link GLFW to the project
 #target_link_libraries(IO_TEST OpenGL::GL glfw)
-target_link_libraries(WINDOW_TEST OpenGL::GL glfw)
+add_library(glad STATIC external/glad/src/glad.c)
+target_include_directories(glad PUBLIC external/glad/include)
 
+target_link_libraries(WINDOW_TEST OpenGL::GL glfw glad)
