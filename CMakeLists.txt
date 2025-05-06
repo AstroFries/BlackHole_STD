@@ -22,6 +22,14 @@ set(EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/external")
 set(BINARY_DIR "${PROJECT_SOURCE_DIR}/bin")
 set(LIBRARY_DIR "${PROJECT_SOURCE_DIR}/libs")
 
+include_directories(${INCLUDE_DIR})
+
+# 定义 shaders 文件夹路径
+set(SHADERS_DIR "${PROJECT_SOURCE_DIR}/src/shaders")
+
+# 将路径传递到 C++ 代码中作为宏
+add_definitions(-DSHADERS_DIR="${SHADERS_DIR}")
+
 add_subdirectory(src)
 add_subdirectory(external)
 
@@ -47,3 +55,18 @@ add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 
 target_link_libraries(WINDOW_TEST OpenGL::GL glfw glad)
+
+
+
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+target_include_directories(GEODESIC_TEST PRIVATE
+    ${Python3_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/external/matplotlibcpp
+)
+target_link_libraries(GEODESIC_TEST PRIVATE
+    ${Python3_LIBRARIES}  # 链接python310.lib等库
+)
+find_package(Python3 COMPONENTS NumPy REQUIRED)
+target_include_directories(GEODESIC_TEST PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
+message(STATUS "Python3_INCLUDE_DIRS: ${Python3_INCLUDE_DIRS}")
+message(STATUS "Python3_LIBRARIES: ${Python3_LIBRARIES}")

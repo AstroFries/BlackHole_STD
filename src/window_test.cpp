@@ -134,8 +134,7 @@ int main() {
     glBindVertexArray(0);
 
     // 加载着色器
-    unsigned int shaderProgram = LoadShader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
-
+    unsigned int shaderProgram = LoadShader(SHADERS_DIR "/vertex_shader.glsl", SHADERS_DIR "/fragment_shader.glsl");
     // 渲染循环
     while (!glfwWindowShouldClose(window)) {
         // 处理输入
