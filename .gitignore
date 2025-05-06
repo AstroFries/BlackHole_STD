@@ -1,4 +1,6 @@
 build/
 bin/
 libs/
-external/
+external/glm
+external/glfw
+external/glad
