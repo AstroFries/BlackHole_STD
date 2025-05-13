@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 project(
   "BlackHole_Observer"
@@ -6,7 +6,7 @@ project(
   LANGUAGES C CXX
 )
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
@@ -47,7 +47,9 @@ message(STATUS "OpenGL found: ${OPENGL_gl_LIBRARY}")
 link_directories(${OPENGL_gl_LIBRARY})
 
 
-#Add GLFW Submodule
+#Eigen
+set(EIGEN_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/Eigen")
+target_include_directories(GEODESIC_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
 
 #Link GLFW to the project
 #target_link_libraries(IO_TEST OpenGL::GL glfw)
@@ -56,15 +58,17 @@ target_include_directories(glad PUBLIC external/glad/include)
 
 target_link_libraries(WINDOW_TEST OpenGL::GL glfw glad)
 
-
-
+#set(Python3_FIND_STRATEGY LOCATION)
+#set(Python3_ROOT_DIR "C:/Users/12989/miniconda3/envs/forplt")
+#set(Python3_ROOT_DIR "C:/Users/12989/miniconda3")
+#set(Python3_FIND_VERSION_RANGE "3.6...<3.9")
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 target_include_directories(GEODESIC_TEST PRIVATE
     ${Python3_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/external/matplotlibcpp
 )
 target_link_libraries(GEODESIC_TEST PRIVATE
-    ${Python3_LIBRARIES}  # Á´½Ópython310.libµÈ¿â
+    ${Python3_LIBRARIES}  
 )
 find_package(Python3 COMPONENTS NumPy REQUIRED)
 target_include_directories(GEODESIC_TEST PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
