@@ -24,12 +24,7 @@ set(LIBRARY_DIR "${PROJECT_SOURCE_DIR}/libs")
 
 include_directories(${INCLUDE_DIR})
 
-# 定义 shaders 文件夹路径
-set(SHADERS_DIR "${PROJECT_SOURCE_DIR}/src/shaders")
-
-# 将路径传递到 C++ 代码中作为宏
-add_definitions(-DSHADERS_DIR="${SHADERS_DIR}")
-
+add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(external)
 
@@ -50,14 +45,20 @@ link_directories(${OPENGL_gl_LIBRARY})
 #Eigen
 set(EIGEN_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/Eigen")
 target_include_directories(GEODESIC_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
+target_include_directories(VOLUME_RENDER_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
 
 #Link GLFW to the project
 #target_link_libraries(IO_TEST OpenGL::GL glfw)
 add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 
-target_link_libraries(WINDOW_TEST OpenGL::GL glfw glad)
+target_include_directories(GR_LIB PUBLIC OpenGL::GL glfw glad)
+target_link_libraries(GR_LIB PUBLIC OpenGL::GL glfw glad)
+target_link_libraries(WINDOW_TEST PRIVATE OpenGL::GL glfw glad)
+target_link_libraries(VOLUME_RENDER_TEST PRIVATE OpenGL::GL glfw glad)
 
+#--------------------------
+#Python 
 #set(Python3_FIND_STRATEGY LOCATION)
 #set(Python3_ROOT_DIR "C:/Users/12989/miniconda3/envs/forplt")
 #set(Python3_ROOT_DIR "C:/Users/12989/miniconda3")
