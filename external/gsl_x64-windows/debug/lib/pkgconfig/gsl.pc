@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=
+libdir=
+includedir=
+GSL_CBLAS_LIB=-lgslcblasd
+
+Name: GSL
+Description: GNU Scientific Library
+Version: 
+Libs:  -lgsld ${GSL_CBLAS_LIB}
+Cflags: 
+

@@ -1,3 +1,6 @@
+#ifndef RAY_MARCH_H
+#define RAY_MARCH_H
+
 #include <Eigen>
 #include <memory>
 #include <vector>
@@ -9,6 +12,7 @@ class RayMarch{
     void set_v(Eigen::Vector3d v0);
     virtual svVector compute_light(double step,bool stop(double,double,double)) {return nullptr;};
     svVector light;
+    double M_;
   protected:
     Eigen::Vector3d x0,v0;
 };
@@ -20,10 +24,4 @@ class Flat_ST_RayMarch : public RayMarch {
     svVector compute_light(double step,bool stop(double,double,double) = nullptr) override;
 };
 
-/*
-class Schwarzschild_BH_RayMarch : public RayMarch {
-  public:
-    Schwarzschild_BH_RayMarch();
-    double M = 0;
-    svVector compute_light(double step,bool stop(double,double,double) = nullptr) override;
-}*/
+#endif

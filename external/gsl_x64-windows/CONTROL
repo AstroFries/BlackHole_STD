@@ -1,0 +1,8 @@
+Package: gsl
+Version: 2.8
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: eefa41d9e2902c4e7effcbba5bca299f68650ddbf0e5da412fb49e0ba544b128
+Description: The GNU Scientific Library is a numerical library for C and C++ programmers

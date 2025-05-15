@@ -41,12 +41,13 @@ link_directories(${OPENGL_LIBRARIES})
 message(STATUS "OpenGL found: ${OPENGL_gl_LIBRARY}")
 link_directories(${OPENGL_gl_LIBRARY})
 
-
+#--------------------------
 #Eigen
 set(EIGEN_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/Eigen")
 target_include_directories(GEODESIC_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
 target_include_directories(VOLUME_RENDER_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
 
+#--------------------------
 #Link GLFW to the project
 #target_link_libraries(IO_TEST OpenGL::GL glfw)
 add_library(glad STATIC external/glad/src/glad.c)
@@ -56,7 +57,7 @@ target_include_directories(GR_LIB PUBLIC OpenGL::GL glfw glad)
 target_link_libraries(GR_LIB PUBLIC OpenGL::GL glfw glad)
 target_link_libraries(WINDOW_TEST PRIVATE OpenGL::GL glfw glad)
 target_link_libraries(VOLUME_RENDER_TEST PRIVATE OpenGL::GL glfw glad)
-
+#target_link_libraries(VOLUME_RENDER_TEST PRIVATE OpenGL::GL glfw glad)
 #--------------------------
 #Python 
 #set(Python3_FIND_STRATEGY LOCATION)
@@ -75,3 +76,11 @@ find_package(Python3 COMPONENTS NumPy REQUIRED)
 target_include_directories(GEODESIC_TEST PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
 message(STATUS "Python3_INCLUDE_DIRS: ${Python3_INCLUDE_DIRS}")
 message(STATUS "Python3_LIBRARIES: ${Python3_LIBRARIES}")
+
+#--------------------------
+#GSL
+set(GSL_DIR "${PROJECT_SOURCE_DIR}/external/gsl_x64-windows")
+set(GSL_INCLUDE_DIRS "${GSL_DIR}/include")
+set(GSL_LIBRARIES "${GSL_DIR}/lib/gsl.lib" "${GSL_DIR}/lib/gslcblas.lib")
+target_include_directories(VOLUME_RENDER_TEST PRIVATE ${GSL_INCLUDE_DIRS})
+target_link_libraries(VOLUME_RENDER_TEST PRIVATE ${GSL_LIBRARIES})
