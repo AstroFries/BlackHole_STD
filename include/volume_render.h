@@ -9,6 +9,8 @@ class VolumeRender{
     VolumeRender(svVector x);
     void reset(sv x, sv y, sv z);
     void reset(svVector x);
+    void compute_l();
+    void set_l(sv l);
     double compute_p(double ABS(double,double,double),
                      double EMS(double,double,double));
   private:

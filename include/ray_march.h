@@ -5,12 +5,14 @@
 #include <memory>
 #include <vector>
 typedef std::shared_ptr<std::vector<Eigen::Vector3d>> svVector;
+typedef std::shared_ptr<std::vector<double>> sv;
 class RayMarch{
   public:
     RayMarch();
     void set_camera_pos(Eigen::Vector3d x0);
     void set_v(Eigen::Vector3d v0);
     virtual svVector compute_light(double step,bool stop(double,double,double)) {return nullptr;};
+    virtual sv compute_l(){return nullptr;};
     svVector light;
     double M_;
   protected:

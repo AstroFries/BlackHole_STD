@@ -18,6 +18,7 @@ void Geodesic::compute(double phi_0, double r0, double r_phi, double delta){
     mu_ = 1 / r0;
     mu_phi_ = - r_phi / r0 / r0;
     phi_->push_back(phi_0);
+    while (r_phi / r0 * delta < -0.01)delta /= 2;
     while (true){
         r_->push_back(1 / mu_);
         mu_phi_ += delta * (-mu_ + 3 * M_ * mu_ * mu_);
@@ -45,4 +46,12 @@ sv Geodesic::to_y(double r_max){
         if ((*r_)[i] > r_max) break;
     }
     return x;
+}
+
+sv Geodesic::compute_l(){
+    sv l(new std::vector<double>);
+    for (int i = 0; i < r_->size() - 1; ++i){
+        l->push_back(sqrt(pow((*r_)[i+1] - (*r_)[i],2) / (1 - 2 * M_ / (*r_)[i]) + (*r_)[i] * (*r_)[i] * pow((*phi_)[i+1]- (*phi_)[i],2)));
+    }
+    return l;
 }

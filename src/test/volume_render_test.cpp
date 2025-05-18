@@ -105,6 +105,7 @@ int main() {
             RM0->set_v(v0);
             light0 = RM0->compute_light(0.1,stop);
             VR0->reset(light0);
+            VR0->compute_l();
             double Power = VR0->compute_p(ABS_H, EMS_H);
             //std::cout << Power << std::endl;
             //if (Power > 0.01)std::cout << (int)(atan(100.0 * Power) / 1.571 * 256.0) << std::endl;

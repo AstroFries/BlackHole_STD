@@ -84,3 +84,28 @@ set(GSL_INCLUDE_DIRS "${GSL_DIR}/include")
 set(GSL_LIBRARIES "${GSL_DIR}/lib/gsl.lib" "${GSL_DIR}/lib/gslcblas.lib")
 target_include_directories(VOLUME_RENDER_TEST PRIVATE ${GSL_INCLUDE_DIRS})
 target_link_libraries(VOLUME_RENDER_TEST PRIVATE ${GSL_LIBRARIES})
+
+#--------------------------
+#ImGui
+set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/external/imgui)
+set(IMGUI_BACKEND_DIR ${IMGUI_DIR}/backends)
+
+set(IMGUI_SOURCES
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_BACKEND_DIR}/imgui_impl_glfw.cpp
+    ${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp
+)
+
+add_library(imgui STATIC ${IMGUI_SOURCES})
+target_include_directories(imgui PUBLIC
+    ${IMGUI_DIR}
+    ${IMGUI_BACKEND_DIR}
+)
+target_link_libraries(imgui PUBLIC glfw OpenGL::GL)
+target_link_libraries(IMGUI_TEST PRIVATE imgui )
+target_include_directories(IMGUI_TEST PRIVATE external/glad/include)
+target_link_libraries(IMGUI_TEST PRIVATE glad)

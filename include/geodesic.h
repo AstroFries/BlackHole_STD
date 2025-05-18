@@ -8,6 +8,7 @@ class Geodesic{
     Geodesic(double M);
     void reset(sv r, sv phi);
     void compute(double phi_0, double r0, double r_phi, double delta);
+    sv compute_l();
     sv to_x(double r_max = 20);
     sv to_y(double r_max = 20);
   private:

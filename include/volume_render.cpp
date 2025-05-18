@@ -12,24 +12,12 @@ void VolumeRender::reset(sv x, sv y, sv z){
     this->x_ = x;
     this->y_ = y;
     this->z_ = z;
-    l_.clear();
-    for (int i = 0; i < x_->size() - 1; ++i){
-        l_.push_back(
-            sqrt(
-                pow((*x_)[i+1]-(*x_)[i],2) + pow((*y_)[i+1]-(*y_)[i],2) + pow((*z_)[i+1]-(*z_)[i],2)
-            )
-        );
-    }
+    
     mode = 0;
 }
 void VolumeRender::reset(svVector x){
     this->x_Vector_ = x;
-    l_.clear();
-    for (int i = 0; i < x_Vector_->size() - 1; ++i){
-        l_.push_back(
-            ((*x_Vector_)[i+1] - (*x_Vector_)[i]).norm()
-        );
-    }
+    
     mode = 1;
 }
 double VolumeRender::compute_p(double ABS(double,double,double), double EMS(double, double, double)){
@@ -48,4 +36,28 @@ double VolumeRender::compute_p(double ABS(double,double,double), double EMS(doub
         }
     }
     return L;
+}
+
+void VolumeRender::set_l(sv l){
+    l_ = *l;
+}
+
+void VolumeRender::compute_l(){
+    if (mode == 1){
+        l_.clear();
+        for (int i = 0; i < x_Vector_->size() - 1; ++i){
+            l_.push_back(
+                ((*x_Vector_)[i+1] - (*x_Vector_)[i]).norm()
+            );
+        }
+    }else {
+        l_.clear();
+        for (int i = 0; i < x_->size() - 1; ++i){
+            l_.push_back(
+                sqrt(
+                    pow((*x_)[i+1]-(*x_)[i],2) + pow((*y_)[i+1]-(*y_)[i],2) + pow((*z_)[i+1]-(*z_)[i],2)
+                )
+            );
+        }
+    }
 }
