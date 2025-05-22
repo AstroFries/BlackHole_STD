@@ -129,6 +129,7 @@ void OpenGLRenderer::initBuffers() {
 }
 
 void OpenGLRenderer::updatePixels(const std::vector<unsigned char>& pixels) {
+    glUseProgram(shaderProgram);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
 }

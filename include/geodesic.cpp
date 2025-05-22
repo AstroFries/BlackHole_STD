@@ -18,7 +18,8 @@ void Geodesic::compute(double phi_0, double r0, double r_phi, double delta){
     mu_ = 1 / r0;
     mu_phi_ = - r_phi / r0 / r0;
     phi_->push_back(phi_0);
-    while (r_phi / r0 * delta < -0.01)delta /= 2;
+    int t = 0;
+    while (r_phi / r0 * delta < -0.09 && ++t < 50)delta /= 2;
     while (true){
         r_->push_back(1 / mu_);
         mu_phi_ += delta * (-mu_ + 3 * M_ * mu_ * mu_);

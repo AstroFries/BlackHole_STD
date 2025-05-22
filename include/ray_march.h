@@ -24,6 +24,9 @@ class Flat_ST_RayMarch : public RayMarch {
   public:
     Flat_ST_RayMarch();
     svVector compute_light(double step,bool stop(double,double,double) = nullptr) override;
+    sv compute_l() override;
+  private:
+    sv l_;
 };
 
 #endif

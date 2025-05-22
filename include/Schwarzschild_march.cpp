@@ -17,11 +17,15 @@ svVector Schwarzschild_BH_RayMarch::compute_light(double step,bool stop(double,d
     Geodesic Geodesic0(M_);
     Geodesic0.reset(r, phi);
     Geodesic0.compute(0, x0.norm(), r_phi, step);
-    l_ = Geodesic0.compute_l();
-    light->clear();
+    sv new_l = std::make_shared<std::vector<double>>();
+    new_l = Geodesic0.compute_l();
+    l_ = new_l;
+    //light->clear();
+    svVector new_light = std::make_shared<std::vector<Eigen::Vector3d>>();
     for (int i = 0; i < r->size(); ++i){
-        light->push_back((*r)[i] * cos((*phi)[i]) * xhat_0 + (*r)[i] * sin((*phi)[i]) * phihat_0);
+        new_light->push_back((*r)[i] * cos((*phi)[i]) * xhat_0 + (*r)[i] * sin((*phi)[i]) * phihat_0);
     }
+    light = new_light;
     return light;
 }
 

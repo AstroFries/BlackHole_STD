@@ -13,6 +13,8 @@ class VolumeRender{
     void set_l(sv l);
     double compute_p(double ABS(double,double,double),
                      double EMS(double,double,double));
+    double compute_p(double ABS(double,double,double,double,double,double),
+                     double EMS(double,double,double));
   private:
     sv x_, y_, z_;
     svVector x_Vector_;

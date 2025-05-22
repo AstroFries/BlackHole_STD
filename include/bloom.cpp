@@ -34,8 +34,8 @@ void Bloom::bloom_gauss(float r, float u){
     //std::cout << 1 <<std::endl;
     for (int x = 0; x < width_; ++x){for (int y = 0; y < height_; ++y){
         for (int k = 0; k < 3; ++k){
+            if (buffer1[3 * x + 3 * y * width_ + k] < 1)continue;
             for (int i = std::max(x - (int)(2*r),0); i < std::min(x + (int)(2*r),width_); ++i){
-                if (buffer1[3 * x + 3 * y * width_ + k] < 1)continue;
                 buffer2[3 * i + 3 * y * width_ + k] += 
                     (normalize_k * buffer1[3 * x + 3 * y * width_ + k] * pow(2.72,-pow(i-x,2)/r/r));
             }
@@ -46,8 +46,8 @@ void Bloom::bloom_gauss(float r, float u){
     
     for (int x = 0; x < width_; ++x){for (int y = 0; y < height_; ++y){
         for (int k = 0; k < 3; ++k){
+            if (buffer2[3 * x + 3 * y * width_ + k] < 1)continue;
             for (int j = std::max(y - (int)(2*r),0); j < std::min(y + (int)(2*r),height_); ++j){
-                if (buffer2[3 * x + 3 * y * width_ + k] < 1)continue;
                 buffer1[3 * x + 3 * j * width_ + k] += 
                     (normalize_k * buffer2[3 * x + 3 * y * width_ + k] * pow(2.72,-pow(j-y,2)/r/r));
             }
@@ -56,12 +56,12 @@ void Bloom::bloom_gauss(float r, float u){
     
     for (int i = 0 ; i < width_ * height_ * 3; ++i){
         (*power_)[i] += u*buffer1[i]; 
-        (*pixels_)[i] = (unsigned char)std::min((*power_)[i] ,255.f);
+        (*pixels_)[i] = (unsigned char)std::clamp((*power_)[i], 0.0f, 255.0f);
     }
 }
 
 void Bloom::direct(){
     for (int i = 0 ; i < width_ * height_ * 3; ++i){
-        (*pixels_)[i] = (unsigned char)std::min((*power_)[i],255.f);
+        (*pixels_)[i] = (unsigned char)std::clamp((*power_)[i], 0.0f, 255.0f);
     }
 }

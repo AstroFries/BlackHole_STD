@@ -38,6 +38,27 @@ double VolumeRender::compute_p(double ABS(double,double,double), double EMS(doub
     return L;
 }
 
+double VolumeRender::compute_p(double ABS(double, double, double, double, double, double), 
+                               double EMS(double, double, double)){
+    double L = 0, S = 1;
+    if (mode == 0){
+        for (int i = 0; i < x_->size() - 1; ++i){
+            L += ABS((*x_)[i], (*y_)[i], (*z_)[i], (*x_)[i+1]-(*x_)[i], (*y_)[i+1]-(*y_)[i], (*z_)[i+1]-(*z_)[i]) * l_[i] * S;
+            S *= pow(2.71828, -EMS((*x_)[i],(*y_)[i],(*z_)[i]) * l_[i]);
+        }
+    }else {
+        for (int i = 0; i < x_Vector_->size() - 1; ++i){
+            L += ABS((*x_Vector_)[i][0],(*x_Vector_)[i][1],(*x_Vector_)[i][2], 
+                    (*x_Vector_)[i+1][0]-(*x_Vector_)[i][0], (*x_Vector_)[i+1][1]-(*x_Vector_)[i][1], (*x_Vector_)[i+1][2]-(*x_Vector_)[i][2]
+                    ) * l_[i] * S;
+            //S *= pow(2.71828, -EMS((*x_Vector_)[i][0],(*x_Vector_)[i][1],(*x_Vector_)[i][2]) * l_[i]);
+            S *= 1 - EMS((*x_Vector_)[i][0],(*x_Vector_)[i][1],(*x_Vector_)[i][2]) * l_[i];
+            if (S < 0.01)break;
+        }
+    }
+    return L;
+}
+
 void VolumeRender::set_l(sv l){
     l_ = *l;
 }

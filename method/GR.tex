@@ -53,9 +53,27 @@
     也就是说如果一开始发射一堆光子，我们可以通过上式计算光子运动到任意位置的密度。
     
 
-    黑体辐射、光谱和RGB的转换。
+    \section{黑体辐射、光谱和RGB的转换}
     黑体辐射遵循如下公式：
+    \begin{align*}
+        u(\nu,T) = \frac{8\pi h\nu^3}{c^3} \frac{1}{\mathrm e^{\frac{h\nu}{kT}} - 1}
+    \end{align*}
+    其中$h$是普朗克常数，$k$是玻尔兹曼常数，$c$是光速，$\nu$是频率，$T$是温度。\\
 
-    而人眼看到的RGB三分量可以看作辐射谱在三个基函数下的坐标。
+    而人眼看到的RGB三分量可以看作辐射谱在三个基下的坐标。
 
+    \section{多普勒效应}
+    对于同一个运动的物体，不同位置观测者观测到的光频率、强度均不同。
+    相对论下运动物体辐射强度、频率和其本征参考系下的强度、频率之间关系:
+    \begin{align*}
+        I = \frac{I_0}{\gamma^4(1+\beta\cos\theta)^4}
+    \end{align*}
+    \begin{align*}
+        \nu = \frac{\nu_0}{\gamma(1+\beta\cos\theta)}
+    \end{align*}
+    再结合黑洞积吸盘某处的转速:
+    \begin{align*}
+        v(r) = \sqrt{\frac{GM}{r - r_s}}
+    \end{align*}
+    其中$r_s = 2M$
 \end{document}
