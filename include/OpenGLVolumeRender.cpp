@@ -1,20 +1,8 @@
 #include "OpenGLVolumeRender.h"
+#include "OpenGLShaderInit.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
-static GLuint compileShader(const char* path, GLenum type) {
-    std::ifstream fin(path);
-    std::stringstream ss;
-    ss << fin.rdbuf();
-    std::string src = ss.str();
-    GLuint shader = glCreateShader(type);
-    const char* csrc = src.c_str();
-    glShaderSource(shader, 1, &csrc, nullptr);
-    glCompileShader(shader);
-    // 检查编译错误...
-    return shader;
-}
 
 VolumeComputeShader::VolumeComputeShader(int width, int height, int maxPaths)
     : width_(width), height_(height), maxPaths_(maxPaths) {}
@@ -26,10 +14,9 @@ VolumeComputeShader::~VolumeComputeShader() {
 }
 
 bool VolumeComputeShader::init(const char* computeShaderPath) {
-    GLuint cs = compileShader(computeShaderPath, GL_COMPUTE_SHADER);
-    program_ = glCreateProgram();
-    glAttachShader(program_, cs);
-    glLinkProgram(program_);
+    GLuint cs = compileShaderFromFile(computeShaderPath, GL_COMPUTE_SHADER);
+    if (!cs) return false;
+    program_ = createProgram({cs});
     glDeleteShader(cs);
 
     // 创建SSBO
@@ -40,11 +27,21 @@ bool VolumeComputeShader::init(const char* computeShaderPath) {
     // 创建输出纹理
     glGenTextures(1, &powerTex_);
     glBindTexture(GL_TEXTURE_2D, powerTex_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // 设置 Mipmap 缩小过滤器（关键）
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Wrap 模式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // 创建纹理内存
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_, height_, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    // 生成 Mipmap（只有在 min filter 支持 mipmap 时才有效）
+    glGenerateMipmap(GL_TEXTURE_2D);
+
     GLint success;
     glGetProgramiv(program_, GL_LINK_STATUS, &success);
     if (!success) {
@@ -52,6 +49,8 @@ bool VolumeComputeShader::init(const char* computeShaderPath) {
         glGetProgramInfoLog(program_, 512, NULL, infoLog);
         std::cout << "Shader Link Error: " << infoLog << std::endl;
     }
+
+    
     return true;
 }
 

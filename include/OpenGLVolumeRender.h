@@ -19,7 +19,6 @@ public:
 
     // ¶ÁÈ¡½á¹û
     void downloadPower(std::vector<float>& powerOut);
-
     GLuint getPowerTexture() const { return powerTex_; }
 
 private:

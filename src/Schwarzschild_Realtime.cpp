@@ -2,6 +2,7 @@
 #include "ray_march.h"
 #include "Schwarzschild_march.h"
 #include "OpenGLVolumeRender.h"
+#include "OpenGLPostProcessing.h"
 #include "bloom.h"
 #include <Eigen>
 #include <vector>
@@ -49,8 +50,8 @@ int main() {
     //std::unique_ptr<RayMarch> RM0 = std::make_unique<Flat_ST_RayMarch>();
     RM0->M_ = 0.2;
     
-    double theta0 = 0.2*3.142, phi0 =  -0.12 * 1.571, r0 = 3.7;
-    double theta1 = 0.30*3.142, phi1 = -0.22 * 1.571;
+    double theta0 = 0.2*3.142, phi0 =  -0.02 * 1.571, r0 = 3.7;
+    double theta1 = 0.30*3.142, phi1 = -0.12 * 1.571;
     const int width = 400*4;
     const int height = 300*4;
     std::cout << "Window:  " << width << " x " << height << std::endl;
@@ -64,8 +65,11 @@ int main() {
     svVector light0 = RM0->compute_light(0.005,stop);
     std::vector<std::vector<Eigen::Vector4f>> lights(width * height);
     OpenGLRenderer renderer(width, height, "OpenGL Renderer");
+    renderer.initShaders_Bloom(SHADERS_DIR);
     VolumeComputeShader shader(width, height, 64);
+    
     shader.init(SHADERS_DIR "/volume_compute.comp");
+    
     //*
     std::vector<unsigned char> pixels(width * height * 3, 0);
     std::vector<float> pixels_d(width * height * 3, 0);
@@ -78,7 +82,6 @@ int main() {
     //------------------------------------
     //Ray Marching
     int k = 0;
-    float max_p = 0;
     std::cout << "Ray Marching Started." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
     while (!renderer.shouldClose() && k < width * height) {
@@ -129,7 +132,6 @@ int main() {
 
     //----------------------------------
     //Volume Rendering
-    k = 0;
     std::cout << "Volume Rendering Started." << std::endl;
     start = std::chrono::high_resolution_clock::now();
     std::vector<float> Power(width * height);
@@ -142,71 +144,72 @@ int main() {
     elapsed = end - start;
     std::cout << "  -Upload Done " << elapsed.count() << "ms" <<std::endl;
     // 3. 启动计算
-    shader.dispatch();
-    end = std::chrono::high_resolution_clock::now();
-    elapsed = end - start;
-    std::cout << "  -Compute Done " << elapsed.count() << "ms" <<std::endl;
-    // 4. 读取结果
-    shader.downloadPower(pixels_d);
-    end = std::chrono::high_resolution_clock::now();
-    elapsed = end - start;
-    std::cout << "  -Download Done " << elapsed.count() << "ms" <<std::endl;
-    
-    while (!renderer.shouldClose() && k < width * height) {
-        //std::cout << Power << std::endl;
-        //if (Power[k] > 0)std::cout << k%width << ' ' << k/width << ' ' << Power[k] << std::endl;
-        //if (Power > 0.01)std::cout << (int)(atan(100.0 * Power) / 1.571 * 256.0) << std::endl;
-        //pixels_d[3 * k] = ((5 * Power[k])  * 255.0);
-        //pixels_d[3 * k + 1] = ((5 * Power[k])  * 127.0);
-        //pixels_d[3 * k + 2] = ((5 * Power[k])  * 74.0);
-        for (int j = 0; j < 3; ++j)pixels_d[3 * k +j] = pow(pixels_d[3 * k +j],1/2.2);
-        for (int j = 0; j < 3; ++j)max_p = (pixels_d[3 * k + j] > max_p)?pixels_d[3 * k + j] : max_p;
-        //std::cout << k << ' ' << Power[k] << std::endl;
-        pixels[k * 3 ] = 127;
-        pixels[k * 3 + 1] = 127;
-        pixels[k * 3 + 2] = 127;
-        k++;
-        
-    }//*/
-    end = std::chrono::high_resolution_clock::now();
-    elapsed = end - start;
-    std::cout << "Volume Rendering spent:" << elapsed.count() << "ms" <<std::endl;
-    glClear(GL_COLOR_BUFFER_BIT);
-    renderer.updatePixels(pixels);
-    renderer.render();
-    
-    //------------------------------------
-    //Color Reset
-    std::cout << "Color Reset Started." << std::endl;
-    std::cout << max_p << std::endl;
-    for (int i = 0; i < width * height ; ++i){
-        for (int j = 0; j < 3; ++j)pixels_d[3 * i + j] *= 1.0 * 255/max_p;//2*pixels_d[3 * i] / max_p /max_p;
-        //if (pixels_d[3*i]>1 || pixels_d[3*i] < 0)std::cout << k << std::endl;
-        //std::cout << i << ' ' <<(int)(1.0*pixels_d[3 * i] *254.0 ) << std::endl;
-        pixels[i * 3 + 0] = std::min((int)(2.5*pixels_d[3 * i]  ),255);
-        pixels[i * 3 + 1] = std::min((int)(2.5*pixels_d[3 * i + 1]  ),255);
-        pixels[i * 3 + 2] = std::min((int)(2.5*pixels_d[3 * i + 2]  ),255);
-        //pixels_d[3 * i] *= 1.4*pixels_d[3 * i] *254.0;
-        //pixels_d[3 * i + 1] = 1.0*pixels_d[3 * i] *127.0;
-        //pixels_d[3 * i + 2] = 1.0*pixels_d[3 * i] *74.0;
-        //pixels_d[3 * i] = 1.0*pixels_d[3 * i] *254.0;
-    }
-
-    //------------------------------------
-    //Blooming
-    renderer.updatePixels(pixels);
-    renderer.render();
-    std::cout << "Blooming1" <<std::endl;
-    Bloom bloomer(width, height, &pixels_d, &pixels);
-    bloomer.bloom_gauss(12, 0.5);
-    renderer.updatePixels(pixels);
-    renderer.render();
-    std::cout << "Blooming2" <<std::endl;
-    bloomer.bloom_gauss(150, 0.25);//*/
     while (!renderer.shouldClose()) {
+        
+        shader.dispatch();
+        
+        
+        
+        // 4. 读取结果
+        /*
+        shader.downloadPower(pixels_d);
+        end = std::chrono::high_resolution_clock::now();
+        elapsed = end - start;
+        std::cout << "  -Download Done " << elapsed.count() << "ms" <<std::endl;
+        float max_p = 0;
+        k = 0;
+        while (!renderer.shouldClose() && k < width * height) {
+            for (int j = 0; j < 3; ++j)pixels_d[3 * k +j] = pow(pixels_d[3 * k +j],1/2.2);
+            for (int j = 0; j < 3; ++j)max_p = (pixels_d[3 * k + j] > max_p)?pixels_d[3 * k + j] : max_p;
+            //std::cout << k << ' ' << Power[k] << std::endl;
+            //pixels[k * 3 ] = 127;
+            //pixels[k * 3 + 1] = 127;
+            //pixels[k * 3 + 2] = 127;
+            k++;
+            
+        }//
+        end = std::chrono::high_resolution_clock::now();
+        elapsed = end - start;
+        std::cout << "Volume Rendering spent:" << elapsed.count() << "ms" <<std::endl;
+        glClear(GL_COLOR_BUFFER_BIT);
         renderer.updatePixels(pixels);
         renderer.render();
         
-    }//*/
+        //------------------------------------
+        //Color Reset
+        std::cout << "Color Reset Started." << std::endl;
+        std::cout << max_p << std::endl;
+        for (int i = 0; i < width * height ; ++i){
+            //for (int j = 0; j < 3; ++j)pixels_d[3 * i + j] *= 1.0 * 255/max_p;//2*pixels_d[3 * i] / max_p /max_p;
+            //pixels[i * 3 + 0] = std::min((int)(2.5*pixels_d[3 * i]  ),255);
+            //pixels[i * 3 + 1] = std::min((int)(2.5*pixels_d[3 * i + 1]  ),255);
+            //pixels[i * 3 + 2] = std::min((int)(2.5*pixels_d[3 * i + 2]  ),255);
+        }
+
+        //------------------------------------
+        //Blooming
+        //renderer.updatePixels(pixels);
+        //renderer.render();
+        */
+        /*
+        start = std::chrono::high_resolution_clock::now();
+        std::cout << "  -Blooming1" <<std::endl;
+        Bloom bloomer(width, height, &pixels_d, &pixels);
+        bloomer.bloom_gauss(12, 0.5);
+        std::cout << "  -Blooming2" <<std::endl;
+        //bloomer.bloom_gauss(50, 0.25);//
+        end = std::chrono::high_resolution_clock::now();
+        elapsed = end - start;
+        std::cout << "Blooming Done " << elapsed.count() << "ms" <<std::endl;
+        */
+        //renderer.updatePixels(pixels);
+        renderer.updatePixels(shader.getPowerTexture());
+        renderer.render();
+
+        elapsed = std::chrono::high_resolution_clock::now() - end;
+        std::cout << "\r  -Compute Done " << elapsed.count() << "ms" << ' ' << std::flush;
+        end = std::chrono::high_resolution_clock::now();
+        //_sleep(100);
+    }
     return 0;
 }

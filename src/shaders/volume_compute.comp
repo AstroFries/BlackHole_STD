@@ -164,8 +164,8 @@ void main() {
         r_color.x = pow(r_color.x,2.2);
         r_color.y = pow(r_color.y,2.2);
         r_color.z = pow(r_color.z,2.2);
-        //power += fog_density(p.xyz) * p.w * S *dopplerI(p.xyz, vc) * r_color;
-        power += fog_density(p.xyz) * p.w * S * r_color;
+        power += fog_density(p.xyz) * p.w * S *dopplerI(p.xyz, vc) * r_color;
+        //power += fog_density(p.xyz) * p.w * S * r_color;
         S *= exp(- 15.2 * fog_density(p.xyz) * p.w * length(p.xyz));
     }
     //pixel = 0.8;
@@ -174,6 +174,11 @@ void main() {
         if (isnan(power[c]) || isinf(power[c])) {
             power[c] = 0.0;
         }
+    }
+    power *= 2e6;
+    for (int i = 0; i < 3; ++i){
+        if (power[i] > 1)power[i] = 1;
+        power[i] = pow(power[i],1/2.2);
     }
     imageStore(powerImage, pixel, vec4(power, 1));
 }
