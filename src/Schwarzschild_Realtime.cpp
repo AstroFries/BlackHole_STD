@@ -2,7 +2,6 @@
 #include "ray_march.h"
 #include "Schwarzschild_march.h"
 #include "OpenGLVolumeRender.h"
-#include "OpenGLPostProcessing.h"
 #include "bloom.h"
 #include <Eigen>
 #include <vector>
@@ -21,39 +20,18 @@
 #define R 0.15
 typedef std::shared_ptr<std::vector<Eigen::Vector3d>> svVector;
 
-double AccretionDisc(double x, double y, double z){
-    if (x*x + y*y < 0.98*0.98 || z * z > 0.1*0.1)return 0;
-    return 0.5*pow(2.72,-450*z*z-(x*x+y*y-2*sqrt(x*x+y*y)))*(pow(x*x + y*y - 0.98*0.98,1));//*(1.2+std::sin(60/pow(x*x+y*y-0.2*0.2,0.3)));//*(1.5+std::sin(40/pow(x*x+y*y-0.2*0.2,0.3)-52*x*x-52*y*y));
-}
-double ABS(double x, double y, double z, double vx, double vy, double vz){
-    if (x*x + y*y < 0.98*0.98 || z * z > 0.1*0.1)return 0;
-    double M_ = 0.2;
-    double r_ = sqrt(x * x + y * y);
-    double dv = (vx * x + vy * y + vz * z)/(x * x + y * y + z * z) * (1/sqrt(1-2*M_/r_) - 1);
-    vx += dv * x;
-    vy += dv * y;
-    vz += dv * z;
-    double cos_theta = (x * vy - y* vx)/r_/sqrt(vx*vx + vy*vy + vz*vz);
-    double gamma2 = (r_ - 2 * M_)/M_;
-    double beta = sqrt(M_/(r_ - 2 * M_));
-    return 1.35*AccretionDisc(x, y, z)/gamma2 / gamma2 / pow(1+ beta * cos_theta,4);//*vz;
-    
-}
-double EMS(double x, double y, double z){
-    return 2.02*AccretionDisc(x, y, z);
-}
 bool stop(double x, double y, double z){
     return x*x + y*y + z*z > 8*8;
 }
 int main() {
-    std::unique_ptr<RayMarch> RM0 = std::make_unique<Schwarzschild_BH_RayMarch>();
-    //std::unique_ptr<RayMarch> RM0 = std::make_unique<Flat_ST_RayMarch>();
+    //std::unique_ptr<RayMarch> RM0 = std::make_unique<Schwarzschild_BH_RayMarch>();
+    std::unique_ptr<RayMarch> RM0 = std::make_unique<Flat_ST_RayMarch>();
     RM0->M_ = 0.2;
     
-    double theta0 = 0.2*3.142, phi0 =  -0.02 * 1.571, r0 = 3.7;
-    double theta1 = 0.30*3.142, phi1 = -0.12 * 1.571;
-    const int width = 400*4;
-    const int height = 300*4;
+    double theta0 = 0.2*3.142, phi0 =  -0.22 * 1.571, r0 = 4.7;//摄像机位置
+    double theta1 = 0.2*3.142, phi1 = -0.32 * 1.571;//摄像机视角
+    const int width = 400*1;
+    const int height = 300*1;
     std::cout << "Window:  " << width << " x " << height << std::endl;
     Eigen::Vector3d x0(-r0*cos(theta0)*cos(phi0),-r0*sin(theta0)*cos(phi0),-r0*sin(phi0));
     Eigen::Vector3d v1(cos(theta1)*cos(phi1),sin(theta1)*cos(phi1),sin(phi1));
@@ -66,7 +44,7 @@ int main() {
     std::vector<std::vector<Eigen::Vector4f>> lights(width * height);
     OpenGLRenderer renderer(width, height, "OpenGL Renderer");
     renderer.initShaders_Bloom(SHADERS_DIR);
-    VolumeComputeShader shader(width, height, 64);
+    VolumeComputeShader shader(width, height, 64);//64为体渲染采样数
     
     shader.init(SHADERS_DIR "/volume_compute.comp");
     
@@ -136,7 +114,7 @@ int main() {
     start = std::chrono::high_resolution_clock::now();
     std::vector<float> Power(width * height);
 
-    // 2. 上传路径数据（lights 必须是 std::vector<std::vector<Eigen::Vector4f>>，每像素最多64条路径）
+    // 2. 上传路径数据
     shader.uploadPaths(lights);
 
     //shader.downloadPower(Power);
@@ -148,61 +126,6 @@ int main() {
         
         shader.dispatch();
         
-        
-        
-        // 4. 读取结果
-        /*
-        shader.downloadPower(pixels_d);
-        end = std::chrono::high_resolution_clock::now();
-        elapsed = end - start;
-        std::cout << "  -Download Done " << elapsed.count() << "ms" <<std::endl;
-        float max_p = 0;
-        k = 0;
-        while (!renderer.shouldClose() && k < width * height) {
-            for (int j = 0; j < 3; ++j)pixels_d[3 * k +j] = pow(pixels_d[3 * k +j],1/2.2);
-            for (int j = 0; j < 3; ++j)max_p = (pixels_d[3 * k + j] > max_p)?pixels_d[3 * k + j] : max_p;
-            //std::cout << k << ' ' << Power[k] << std::endl;
-            //pixels[k * 3 ] = 127;
-            //pixels[k * 3 + 1] = 127;
-            //pixels[k * 3 + 2] = 127;
-            k++;
-            
-        }//
-        end = std::chrono::high_resolution_clock::now();
-        elapsed = end - start;
-        std::cout << "Volume Rendering spent:" << elapsed.count() << "ms" <<std::endl;
-        glClear(GL_COLOR_BUFFER_BIT);
-        renderer.updatePixels(pixels);
-        renderer.render();
-        
-        //------------------------------------
-        //Color Reset
-        std::cout << "Color Reset Started." << std::endl;
-        std::cout << max_p << std::endl;
-        for (int i = 0; i < width * height ; ++i){
-            //for (int j = 0; j < 3; ++j)pixels_d[3 * i + j] *= 1.0 * 255/max_p;//2*pixels_d[3 * i] / max_p /max_p;
-            //pixels[i * 3 + 0] = std::min((int)(2.5*pixels_d[3 * i]  ),255);
-            //pixels[i * 3 + 1] = std::min((int)(2.5*pixels_d[3 * i + 1]  ),255);
-            //pixels[i * 3 + 2] = std::min((int)(2.5*pixels_d[3 * i + 2]  ),255);
-        }
-
-        //------------------------------------
-        //Blooming
-        //renderer.updatePixels(pixels);
-        //renderer.render();
-        */
-        /*
-        start = std::chrono::high_resolution_clock::now();
-        std::cout << "  -Blooming1" <<std::endl;
-        Bloom bloomer(width, height, &pixels_d, &pixels);
-        bloomer.bloom_gauss(12, 0.5);
-        std::cout << "  -Blooming2" <<std::endl;
-        //bloomer.bloom_gauss(50, 0.25);//
-        end = std::chrono::high_resolution_clock::now();
-        elapsed = end - start;
-        std::cout << "Blooming Done " << elapsed.count() << "ms" <<std::endl;
-        */
-        //renderer.updatePixels(pixels);
         renderer.updatePixels(shader.getPowerTexture());
         renderer.render();
 

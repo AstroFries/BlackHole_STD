@@ -11,16 +11,16 @@ public:
     OpenGLRenderer(int width, int height, const std::string& title);
     ~OpenGLRenderer();
 
-    void updatePixels(const std::vector<unsigned char>& pixels);
-    void updatePixels(GLuint textureId);
-    void render();
-    bool shouldClose();
+    void updatePixels(const std::vector<unsigned char>& pixels);//用<unsigned char>更新屏幕
+    void updatePixels(GLuint textureId);//用texture更新屏幕
+    void render();//渲染
+    bool shouldClose();//检测关闭
     GLuint get_VAO(){return VAO;};
 
-    void initShaders_Bloom(const char* shaderDIR);
-    void enableBloom(bool enable);       // 启用/禁用泛光
-    void setBloomThreshold(float threshold);
-    void setBloomStrength(float strength);
+    void initShaders_Bloom(const char* shaderDIR);//输入shader的位置
+    void enableBloom(bool enable);// 启用/禁用泛光
+    void setBloomThreshold(float threshold);//泛光开始值
+    void setBloomStrength(float strength);//泛光强度
 
     
 private:
@@ -46,13 +46,13 @@ private:
     bool bloomEnabled = true;
     float bloomThreshold = 0.2f;
     float bloomStrength = 0.2f;
-    int bloom_N = 16;
+    int bloom_N = 16;//ping pong 次数,2次相当于一次高斯卷积
 
     void initPostProcessFramebuffers();
-    void extractBrightAreas(GLuint sourceTexture);
-    void gaussianBlur(GLuint sourceTexture, int iterations = 4);
-    void combineFinalImage(GLuint originalTexture, GLuint bloomTexture);
-    void RenderQuad();
+    void extractBrightAreas(GLuint sourceTexture);//截取高亮区
+    void gaussianBlur(GLuint sourceTexture, int iterations = 4);//pingpong高斯卷积
+    void combineFinalImage(GLuint originalTexture, GLuint bloomTexture);//将泛光图叠加到原图上
+    void RenderQuad();//更新
 };
 
 #endif // OPENGL_RENDERER_H

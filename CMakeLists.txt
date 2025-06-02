@@ -45,6 +45,7 @@ link_directories(${OPENGL_gl_LIBRARY})
 #Eigen
 set(EIGEN_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/Eigen")
 target_include_directories(GEODESIC_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
+target_include_directories(GEODESIC_AUTO_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
 target_include_directories(VOLUME_RENDER_TEST PRIVATE ${EIGEN_INCLUDE_DIR})
 
 #--------------------------
@@ -74,8 +75,21 @@ target_link_libraries(GEODESIC_TEST PRIVATE
 )
 find_package(Python3 COMPONENTS NumPy REQUIRED)
 target_include_directories(GEODESIC_TEST PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
+
+target_include_directories(GEODESIC_AUTO_TEST PRIVATE
+    ${Python3_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/external/matplotlibcpp
+)
+target_link_libraries(GEODESIC_AUTO_TEST PRIVATE
+    ${Python3_LIBRARIES}  
+)
+target_include_directories(GEODESIC_AUTO_TEST PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
 message(STATUS "Python3_INCLUDE_DIRS: ${Python3_INCLUDE_DIRS}")
 message(STATUS "Python3_LIBRARIES: ${Python3_LIBRARIES}")
+
+
+
+
 
 #--------------------------
 #GSL
@@ -109,3 +123,7 @@ target_link_libraries(imgui PUBLIC glfw OpenGL::GL)
 target_link_libraries(IMGUI_TEST PRIVATE imgui )
 target_include_directories(IMGUI_TEST PRIVATE external/glad/include)
 target_link_libraries(IMGUI_TEST PRIVATE glad)
+
+target_include_directories(GR_LIB PRIVATE
+    ${PROJECT_SOURCE_DIR}/python
+)

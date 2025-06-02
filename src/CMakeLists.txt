@@ -6,6 +6,7 @@ add_executable(SWARZSCHILD_BH Schwarzschild.cpp)
 add_executable(SWZ_BH_REALTIME Schwarzschild_Realtime.cpp)
 add_executable(BLOOM_TEST test/bloom_test.cpp)
 add_executable(IMGUI_TEST test/imgui_test.cpp)
+add_executable(GEODESIC_AUTO_TEST test/geodesic_auto_test.cpp)
 
 target_link_libraries(GEODESIC_TEST PRIVATE GR_LIB)
 target_link_libraries(VOLUME_RENDER_TEST PRIVATE GR_LIB)
@@ -13,6 +14,7 @@ target_link_libraries(WINDOW_TEST PRIVATE GR_LIB)
 target_link_libraries(SWARZSCHILD_BH PRIVATE GR_LIB)
 target_link_libraries(SWZ_BH_REALTIME PRIVATE GR_LIB)
 target_link_libraries(BLOOM_TEST PRIVATE GR_LIB)
+target_link_libraries(GEODESIC_AUTO_TEST PRIVATE GR_LIB)
 
 add_subdirectory(shaders)
 

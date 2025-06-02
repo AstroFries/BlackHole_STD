@@ -15,7 +15,7 @@ int main()
     BH.reset(r, phi);
 
     for (int i = 0; i < 5; ++i){
-        BH.compute(0, 3.1 + i * 0.2, 0, 0.01);
+        BH.compute(0, 3.5 + i * 0.2, 0, 0.01);
         plt::plot(*(BH.to_x(10)),*(BH.to_y(10)));
     }
     PyRun_SimpleString("import matplotlib.pyplot as plt");
