@@ -21,6 +21,10 @@ public:
     void downloadPower(std::vector<float>& powerOut);
     GLuint getPowerTexture() const { return powerTex_; }
 
+    float T_ = 5000, L_ = 1e6, time_ = 0;
+    bool if_dopplerT_ = true, if_dopplerI_ = true;
+
+
 private:
     int width_, height_, maxPaths_;
     GLuint program_ = 0;

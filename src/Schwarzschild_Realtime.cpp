@@ -3,6 +3,9 @@
 #include "Schwarzschild_march.h"
 #include "OpenGLVolumeRender.h"
 #include "bloom.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include <Eigen>
 #include <vector>
 #include <memory>
@@ -24,14 +27,14 @@ bool stop(double x, double y, double z){
     return x*x + y*y + z*z > 8*8;
 }
 int main() {
-    //std::unique_ptr<RayMarch> RM0 = std::make_unique<Schwarzschild_BH_RayMarch>();
-    std::unique_ptr<RayMarch> RM0 = std::make_unique<Flat_ST_RayMarch>();
+    std::unique_ptr<RayMarch> RM0 = std::make_unique<Schwarzschild_BH_RayMarch>();
+    //std::unique_ptr<RayMarch> RM0 = std::make_unique<Flat_ST_RayMarch>();
     RM0->M_ = 0.2;
     
-    double theta0 = 0.2*3.142, phi0 =  -0.22 * 1.571, r0 = 4.7;//摄像机位置
-    double theta1 = 0.2*3.142, phi1 = -0.32 * 1.571;//摄像机视角
-    const int width = 400*1;
-    const int height = 300*1;
+    double theta0 = 0.2*3.142, phi0 =  -0.805 * 1.571, r0 = 2.7;//摄像机位�?
+    double theta1 = 0.2*3.142, phi1 = -0.805 * 1.571;//摄像机视�?
+    const int width = 400*2;
+    const int height = 300*2;
     std::cout << "Window:  " << width << " x " << height << std::endl;
     Eigen::Vector3d x0(-r0*cos(theta0)*cos(phi0),-r0*sin(theta0)*cos(phi0),-r0*sin(phi0));
     Eigen::Vector3d v1(cos(theta1)*cos(phi1),sin(theta1)*cos(phi1),sin(phi1));
@@ -44,10 +47,13 @@ int main() {
     std::vector<std::vector<Eigen::Vector4f>> lights(width * height);
     OpenGLRenderer renderer(width, height, "OpenGL Renderer");
     renderer.initShaders_Bloom(SHADERS_DIR);
-    VolumeComputeShader shader(width, height, 64);//64为体渲染采样数
-    
+    VolumeComputeShader shader(width, height, 64);//64为体渲染采样�?
     shader.init(SHADERS_DIR "/volume_compute.comp");
     
+    //ImGui Init
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(renderer.getWindow(), true);
+    ImGui_ImplOpenGL3_Init("#version 330");
     //*
     std::vector<unsigned char> pixels(width * height * 3, 0);
     std::vector<float> pixels_d(width * height * 3, 0);
@@ -63,6 +69,7 @@ int main() {
     std::cout << "Ray Marching Started." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
     while (!renderer.shouldClose() && k < width * height) {
+        if (k % 1000 == 0)std::cout << "\r  loading... " << k<< "/" << width * height << std::flush;
         double kx,ky;
         kx = (((double)(k%width))/width - 0.5)/0.5 * X_SIGHT;
         ky = (((double)(k/width))/height - 0.5)/0.5 * Y_SIGHT;            
@@ -122,17 +129,48 @@ int main() {
     elapsed = end - start;
     std::cout << "  -Upload Done " << elapsed.count() << "ms" <<std::endl;
     // 3. 启动计算
+
+    float time = 0;
     while (!renderer.shouldClose()) {
         
         shader.dispatch();
         
+        shader.time_ = time;
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::Begin("Control");
+        static float strength = 0.2f, LM = 6.f;
+        if (ImGui::SliderFloat("Bloom Strength", &strength, 0.0f, 2.0f))
+            renderer.setBloomStrength(strength);
+        static float T = 5000.f;
+        if (ImGui::SliderFloat("Tempetarue", &T, 500.0f, 20000.0f))
+            shader.T_ = T;
+        static int if_dopplerI = true, if_dopplerT = true, bloom_N = 8;
+        if (ImGui::SliderInt("Doppler I", &if_dopplerI, 0, 1))
+            shader.if_dopplerI_ = if_dopplerI;
+        if (ImGui::SliderInt("Doppler T", &if_dopplerT, 0, 1))
+            shader.if_dopplerT_ = if_dopplerT;
+        if (ImGui::SliderInt("Bloom_N", &bloom_N, 1, 20))
+            renderer.bloom_N = bloom_N * 2;
+        if (ImGui::SliderFloat("log Luminance", &LM, 1, 20))
+            shader.L_ = pow(10.f,LM);
+        ImGui::End();
+        ImGui::Render();
+
         renderer.updatePixels(shader.getPowerTexture());
-        renderer.render();
+        
 
         elapsed = std::chrono::high_resolution_clock::now() - end;
         std::cout << "\r  -Compute Done " << elapsed.count() << "ms" << ' ' << std::flush;
         end = std::chrono::high_resolution_clock::now();
+        time += elapsed.count() * 1e-4;
         //_sleep(100);
+        renderer.render(false);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        //renderer.render();
+        glfwSwapBuffers(renderer.getWindow());
+        glfwPollEvents();
     }
     return 0;
 }

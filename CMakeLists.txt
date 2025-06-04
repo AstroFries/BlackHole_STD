@@ -124,6 +124,10 @@ target_link_libraries(IMGUI_TEST PRIVATE imgui )
 target_include_directories(IMGUI_TEST PRIVATE external/glad/include)
 target_link_libraries(IMGUI_TEST PRIVATE glad)
 
+target_link_libraries(SWZ_BH_REALTIME PRIVATE imgui )
+target_include_directories(SWZ_BH_REALTIME PRIVATE external/glad/include)
+target_link_libraries(SWZ_BH_REALTIME PRIVATE glad)
+
 target_include_directories(GR_LIB PRIVATE
     ${PROJECT_SOURCE_DIR}/python
 )

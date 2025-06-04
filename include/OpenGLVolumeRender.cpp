@@ -72,6 +72,11 @@ void VolumeComputeShader::dispatch() {
     glUniform1i(glGetUniformLocation(program_, "width"), width_);
     glUniform1i(glGetUniformLocation(program_, "height"), height_);
     glUniform1i(glGetUniformLocation(program_, "pathStride"), maxPaths_);
+    glUniform1f(glGetUniformLocation(program_, "temperature"), T_);
+    glUniform1i(glGetUniformLocation(program_, "if_dopplerI"), if_dopplerI_);
+    glUniform1i(glGetUniformLocation(program_, "if_dopplerT"), if_dopplerT_);
+    glUniform1f(glGetUniformLocation(program_, "time"), time_);
+    glUniform1f(glGetUniformLocation(program_, "L"), L_);
     glDispatchCompute((width_+15)/16, (height_+15)/16, 1);
     glBindImageTexture(1, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     // 解绑 SSBO

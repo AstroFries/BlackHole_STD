@@ -9,7 +9,7 @@ class Gauge_March : public RayMarch {
     //double M = 0;
     //void set_M(double M){this->M = M;}
     svVector compute_light(double step,bool stop(double,double,double) = nullptr) override;
-    //sv compute_l() override;
+    sv compute_l() override;
   private:
     sv l_;
 };

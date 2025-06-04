@@ -136,11 +136,14 @@ svVector Gauge_March::compute_light(double step,bool stop(double,double,double))
         //TODO:使用投影法将切向量投影到类光矢量
         //if (t%10 == 0 )std::cout << std::endl << "ds^2 = " << ds2 << std::endl;
         //if (t%10 == 0 )std::cout  << "dt/dlambda = " << v[3] << std::endl;
-        if (t % 10 == 0)new_light->push_back(Eigen::Vector3d(r[0] * std::sin(r[1]) * std::cos(r[2]),
-                            r[0] * std::sin(r[1]) * std::sin(r[2]) ,
-                            r[0] * std::cos(r[1])));
+        if (t % 10 == 0)new_light->push_back(Eigen::Vector3d(r[0] * M_ * std::sin(r[1]) * std::cos(r[2]),
+                            r[0] * M_ * std::sin(r[1]) * std::sin(r[2]) ,
+                            r[0] * M_ * std::cos(r[1])));
         //std::cout << r[0] << std::endl;
     }
     light = new_light;
     return light;
+}
+sv Gauge_March::compute_l(){
+    return l_;
 }

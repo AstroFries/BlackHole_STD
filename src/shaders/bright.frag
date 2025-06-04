@@ -11,5 +11,5 @@ void main() {
     if (brightness >= brightnessThreshold)
         FragColor = vec4(color, 1.0);
     else
-        FragColor = vec4(color * pow(brightness / brightnessThreshold,2), 1.0); // 非亮部输出黑色
+        FragColor = vec4(color * pow(brightness / brightnessThreshold,1), 1.0); // 非亮部输出一部分
 }

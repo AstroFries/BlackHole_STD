@@ -155,7 +155,7 @@ void OpenGLRenderer::updatePixels(GLuint textureId) {
     extTexture = textureId;
 }
 
-void OpenGLRenderer::render() {
+void OpenGLRenderer::render(bool if_swap) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLuint texToUse = extTexture ? extTexture : texture;
@@ -172,9 +172,10 @@ void OpenGLRenderer::render() {
         glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
         RenderQuad();
     }
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    if (if_swap){
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
 }
 
 bool OpenGLRenderer::shouldClose() {
@@ -240,18 +241,19 @@ void OpenGLRenderer::extractBrightAreas(GLuint sourceTexture) {
 }
 
 void OpenGLRenderer::gaussianBlur(GLuint sourceTexture, int iterations) {
-    bool horizontal = true;
+    bool horizontal = true, first_iteration = true;
     for (int i = 0; i < iterations; ++i) {
-        int index = i % 2;
+        int index = horizontal ? 0 : 1;
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[index]);
         glUseProgram(blurShader);
         glUniform1i(glGetUniformLocation(blurShader, "horizontal"), horizontal);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, horizontal ? sourceTexture : pingpongTex[1 - index]);
-
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? sourceTexture : pingpongTex[1 - index]);
         RenderQuad();
         horizontal = !horizontal;
+        if (first_iteration) first_iteration = false;
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void OpenGLRenderer::combineFinalImage(GLuint originalTexture, GLuint bloomTexture) {
