@@ -1,0 +1,80 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage{ctex} %使文档可以输入中文
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\begin{document}
+    \title{非平直时空光学}
+    \maketitle 
+    \section{测地线}
+    在广义相对论中，自由物体的运动是时空中的一条测地线，遵循测地线方程：
+    \begin{align*}
+        \frac{\mathrm d^2 x^{\mu}}{\mathrm d \lambda ^2} = {\Gamma^{\mu}}_{\nu\eta}\frac{\mathrm d x^{\nu}}{\mathrm d \lambda}\frac{\mathrm d x^{\eta}}{\mathrm d \lambda} ,\mu = 0,1,2,3 
+    \end{align*}
+    光比较特殊，光在时空的轨迹上切矢的模长恒为零。
+    \begin{align*}
+        g_{\mu\nu}\frac{\mathrm d x^{\mu}}{\mathrm d \lambda}\frac{\mathrm dx^{\nu}}{\mathrm d\lambda} = 0  
+    \end{align*}
+    \section{施瓦西时空}
+    施瓦西时空的线元表达式如下:
+    \begin{align*}
+        \mathrm ds^2 = -(1-\frac{2M}{r} )\mathrm dt^2 +(1-\frac{2M}{r} )^{-1}\mathrm dr^2 + r^2\mathrm d\theta^2 + r^2\sin^2 \theta \mathrm d\phi ^2
+    \end{align*}
+    施瓦西时空具有球对称性，因此周遭光的运动轨迹一直在同一个平面内，这个平面过黑洞中心。\\
+    用$\left\{r,\theta,\phi,t\right\}$坐标描述时空，不妨将光放在$\theta = \frac{\pi}{2} $平面上，则光的轨迹可以被化简到如下方程：
+    \begin{align*}
+        \frac{\mathrm d^{2}}{\mathrm d\phi^{2}} (\frac{1}{r}) + \frac{1}{r} = 3M(\frac{1}{r} )^2
+    \end{align*}
+    \section{非平直时空下的光通截面}
+    我们知道在平直时空下光的辐射强度和发射距离平方成反比，而人眼看到的大小也和距离平方成反比。\\
+    现在想研究光通截面的面积究竟在光线轨迹上是如何变化的。\\
+    研究两个相互靠近的光子的运动，设他们在时空中的参数曲线分别为$\mathbf x(\lambda),\mathbf x(\lambda)+\widetilde {\mathbf x}(\lambda) $   ，其中$\lambda$ 是仿射参数。
+    他们各自遵守测地线方程：
+    \begin{align*}
+        \frac{\mathrm d^2 x^{\mu}}{\mathrm d \lambda ^2} = {\Gamma^{\mu}}_{\nu\eta}\frac{\mathrm d x^{\nu}}{\mathrm d \lambda}\frac{\mathrm d x^{\eta}}{\mathrm d \lambda} ,\mu = 0,1,2,3 
+    \end{align*}
+    \begin{align*}
+        \frac{\mathrm d^2 (x^{\mu}+\widetilde{\mathbf x}^{\mu})}{\mathrm d \lambda ^2} = {\Gamma'^{\mu}}_{\nu\eta}\frac{\mathrm d (x^{\nu}+\widetilde{\mathbf x}^{\nu})}{\mathrm d \lambda}\frac{\mathrm d (x^{\eta}+\widetilde{\mathbf x}^{\eta})}{\mathrm d \lambda} ,\mu = 0,1,2,3 
+    \end{align*}
+    因为相互靠近，可以将$\widetilde{\mathbf x}$视为相对$\mathbf x$的小量
+    带入测地线，相减得到：
+    \begin{align*}
+        \frac{\mathrm d^2 \widetilde{\mathbf x}^{\mu}}{\mathrm d\lambda ^2} = 2{\Gamma ^{\mu}}_{\nu\eta}\frac{\mathrm d x^{\nu}}{\mathrm d\lambda}\frac{\mathrm d \widetilde{\mathbf x}^\eta}{\mathrm d\lambda}  
+        +{\Gamma ^{\mu}}_{\nu\eta,\kappa}\frac{\mathrm d x^{\nu}}{\mathrm d \lambda}\frac{\mathrm d x^{\eta}}{\mathrm d \lambda}\widetilde{\mathbf x}^{\kappa}
+    \end{align*}
+    令:
+    \[{A^{\mu}}_{\eta}(\lambda) = -2{\Gamma ^{\mu}}_{\nu\eta}\frac{\mathrm d x^{\nu}}{\mathrm d\lambda}\]
+    \[{B^{\mu}}_{\eta}(\lambda) = -{\Gamma ^{\mu}}_{\nu\kappa,\eta}\frac{\mathrm d x^{\nu}}{\mathrm d \lambda}\frac{\mathrm d x^{\kappa}}{\mathrm d \lambda}\]
+    都是通过$\mathbf x(\lambda)$能计算出来的矩阵,得到方程:
+    \begin{align*}
+        \frac{\mathrm d^2 \widetilde{\mathbf x}^{\mu}}{\mathrm d\lambda ^2} +{A^{\mu}}_{\eta}(\lambda)\frac{\mathrm d \widetilde{\mathbf x}^\eta}{\mathrm d\lambda} +{B^{\mu}}_{\eta}(\lambda)\widetilde{\mathbf x}^\eta = 0
+    \end{align*}
+    也就是说如果一开始发射一堆光子，我们可以通过上式计算光子运动到任意位置的密度。
+    
+
+    \section{黑体辐射、光谱和RGB的转换}
+    黑体辐射遵循如下公式：
+    \begin{align*}
+        u(\nu,T) = \frac{8\pi h\nu^3}{c^3} \frac{1}{\mathrm e^{\frac{h\nu}{kT}} - 1}
+    \end{align*}
+    其中$h$是普朗克常数，$k$是玻尔兹曼常数，$c$是光速，$\nu$是频率，$T$是温度。\\
+
+    而人眼看到的RGB三分量可以看作辐射谱在三个基下的坐标。
+
+    \section{多普勒效应}
+    对于同一个运动的物体，不同位置观测者观测到的光频率、强度均不同。
+    相对论下运动物体辐射强度、频率和其本征参考系下的强度、频率之间关系:
+    \begin{align*}
+        I = \frac{I_0}{\gamma^4(1+\beta\cos\theta)^4}
+    \end{align*}
+    \begin{align*}
+        \nu = \frac{\nu_0}{\gamma(1+\beta\cos\theta)}
+    \end{align*}
+    再结合黑洞积吸盘某处的转速:
+    \begin{align*}
+        v(r) = \sqrt{\frac{GM}{r - r_s}}
+    \end{align*}
+    其中$r_s = 2M$\par
+    考虑之前的黑体辐射公式,温度的变化比与$\gamma$的变化比相同.
+\end{document}

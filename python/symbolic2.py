@@ -26,6 +26,21 @@ J_sp = J.applyfunc(trig_to_xyz)
 #print(J_sp)
 
 
+
+a = sp.Symbol('a')
+#a = sp.Rational(1,3)
+rho2 = r**2 + a**2 * sp.cos(theta)**2
+Delta = r**2 - 2*r + a**2
+
+
+
+
+g_spherical_st = sp.Matrix([
+    [1, 0, 0, 0],
+    [0, r**2, 0, 0],
+    [0, 0, r**2 * sp.sin(theta)**2, 0],
+    [0, 0, 0, -1]
+])
 g_spherical = sp.Matrix([
     [1, 0, 0, 0],
     [0, r**2, 0, 0],
@@ -38,25 +53,20 @@ g_spherical = sp.Matrix([
     [0, 0, r**2 * sp.sin(theta)**2, 0],
     [0, 0, 0, -(1-2/r)]
 ])
-a = sp.Rational(1,3)
-rho2 = r**2 + a**2 * sp.cos(theta)**2
-Delta = r**2 - 2*r + a**2
 g_spherical = sp.Matrix([
     [rho2 / Delta,                        0,                                    0,                               0],
     [0,                              rho2,                                    0,                               0],
     [0,                                  0,  (r**2 + a**2 + 2*a**2*r*sp.sin(theta)**2 / rho2) * sp.sin(theta)**2,   -2*a*r*sp.sin(theta)**2 / rho2],
     [0,                                  0,                                    -2*a*r*sp.sin(theta)**2 / rho2,      -(1 - 2*r/rho2)]
 ])
-
-
 print(g_spherical.applyfunc(trig_to_xyz))
 #g_cartesian = J_sp.inv().T * g_spherical.applyfunc(trig_to_xyz) * J_sp.inv()
 #g_cartesian = sp.simplify(g_cartesian)
 
-# 1. 球坐标下求逆
+# 1. 球坐标下求�?
 g_spherical_inv = g_spherical.inv()
 
-# 2. 变换到笛卡尔坐标系
+# 2. 变换到笛卡尔坐标�?
 #g_cartesian_inv = J_sp * g_spherical_inv.applyfunc(trig_to_xyz) * J_sp.T
 #g_cartesian_inv = sp.simplify(g_cartesian_inv)
 
@@ -82,6 +92,7 @@ g_spherical_inv = g_spherical.inv()
 
 coords_sph = [r, theta, phi, t]
 g_spherical_inv = g_spherical.inv()
+g_spherical_st_inv = g_spherical_st.inv()
 Gamma_sph = {}
 
 print("C语言函数输出至output_gauge_sph_inv.h")
@@ -112,6 +123,12 @@ for i in range(4):
                     sp.diff(g_spherical[j, k], coords_sph[l])
                 )
                 s += g_spherical_inv[i, l] * term
+                term = (
+                    sp.diff(g_spherical_st[l, j], coords_sph[k]) +
+                    sp.diff(g_spherical_st[l, k], coords_sph[j]) -
+                    sp.diff(g_spherical_st[j, k], coords_sph[l])
+                )
+                s -= g_spherical_st_inv[i, l] * term
             Gamma_sph[(i, j, k)] = sp.simplify(0.5 * s)
 
 print("C语言球坐标Christoffel函数输出至output_christoffel_sph.h")

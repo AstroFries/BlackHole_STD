@@ -1,0 +1,28 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage{ctex} %使文档可以输入中文
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\begin{document}
+    \title{黑洞渲染器}
+    \maketitle
+    \section{简介}
+    电影《星际穿越》中名为“卡冈图雅”的黑洞给了我很大的震撼，从第一次看到它我就想自己复现一遍。在24秋期末
+    看到有一个别的团队做了一个效果不错的,这让我重新想起之前的计划，于是25春选了计算机图形学、开始
+    自己看广义相对论，准备完成这个项目。感谢大作业给了我一个这样的机会（不然可能拖到暑假自己
+    慢悠悠地做了）。
+
+    本项目主要使用cpp编写，采用CMake构建，调用库包含Eigen、GLAD、GLFW、ImGui、GSL以及Matplotlibcpp。最后两个
+    主要用于测试(GSL为了显示氢原子的轨道以测试体渲染，Matplotlibcpp以测试测地线方程求解器)。以及部分glsl语言实现
+    渲染等效果。项目也包含了
+    部分python语言编写的符号计算程序(用于计算任意时空下的联络以便计算测地线)。
+
+    本项目使用的环境是VSCode,CMake配置使用Visual Studio Community 2022 Release - amd64.
+    如果您在运行GEODESIC\underline \ TEST或GEODESIC\underline \ AUTO\underline \ TEST项目，请确保
+    您的环境中存在python以及numpy.
+    \section{实现流程}
+    
+    
+    
+\end{document}

@@ -5,7 +5,7 @@
 
 class VolumeComputeShader {
 public:
-    VolumeComputeShader(int width, int height, int maxPaths = 64);
+    VolumeComputeShader(int width, int height, int maxPaths = 32);
     ~VolumeComputeShader();
 
     // ±‡“Î∫Õ≥ı ºªØ

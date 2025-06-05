@@ -1,5 +1,5 @@
-#ifndef SCHWARZSCHILD_MARCH_H
-#define SCHWARZSCHILD_MARCH_H
+#ifndef GAUGE_MARCH_H
+#define GAUGE_MARCH_H
 
 #include "ray_march.h"
 

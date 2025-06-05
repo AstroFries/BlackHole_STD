@@ -50,15 +50,14 @@ inline void xyz_to_rtp(Eigen::Vector3d x0, double* r, double* theta, double* phi
 }
 svVector Gauge_March::compute_light(double step,bool stop(double,double,double)){
     double r[4] = {0,0,0,0};//r theta phi t
-    
+    x0 = x0 / M_;
     xyz_to_rtp(x0, r+0, r+1, r+2);
     
     Eigen::Vector3d v0_norm = v0.normalized();
     double v[4] = {0,0,0,0};
-    xyz_to_rtp(x0 + v0.normalized() * 1e-6, v+0, v+1, v+2);
+    xyz_to_rtp(x0 + v0 * 1e-6, v+0, v+1, v+2);
     for (int i = 0; i < 3; ++i)v[i] = (v[i] - r[i]) * 1e6;
-    r[0] /= M_;
-    v[0] /= M_;
+    
     //calculate ds^2 = g_33 dt^2 + (g03+g30)dtdr + (g13+g31)dtdtheta + (g23+g32)dtdphi + \sum_{i,j<3}(g_ij dx_i dx_j)
     //wish ds^2 = 0 , so  Adt^2 + Bdt + C = 0
     
@@ -100,23 +99,17 @@ svVector Gauge_March::compute_light(double step,bool stop(double,double,double))
         std::cerr << "A and B are both zero, cannot solve for vt!" << std::endl;
         v[3] = 0;
     }
-    std::cout << "vt = " << v[3] << std::endl;
+    //std::cout << "vt = " << v[3] << std::endl;
     //for (int i = 0; i < 3; ++i){
     //    std::cout << r[i] << ' ' << v[i] << std::endl;
     //}
     sv new_l = std::make_shared<std::vector<double>>();
     svVector new_light = std::make_shared<std::vector<Eigen::Vector3d>>();
-    for (int t = 0; r[3] > -20; ++t) {
-        for (int i = 0; i < 4; ++i){
-            for (int j = 0; j < 4; ++j){
-                for (int k = 0; k < 4; ++k){
-                    //double theta = (r[1] == pi)?(1.5707):r[1];
-                    v[i] -= step * gamma_sph_table[i][j][k](r[0], r[1], r[2], r[3]) * v[j] * v[k];
-                }
-            }
-            r[i] += v[i] * step;
-            //std::cout << i << ' ' << r[i] << ' ';
-        }
+    for (int t = 0; t < 5000 && r[3] > -60; ++t) {
+        xyz_to_rtp(x0, r+0, r+1, r+2);
+        xyz_to_rtp(x0 + v0 * 1e-6, v+0, v+1, v+2);
+        for (int i = 0; i < 3; ++i)v[i] = (v[i] - r[i]) * 1e6;
+        if (r[0] < 2.05)break;
         double ds2 = 0.0;
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
@@ -133,15 +126,44 @@ svVector Gauge_March::compute_light(double step,bool stop(double,double,double))
             double alpha = 1.0; // 可调节
             v[3] -= alpha * ds2 / d_ds2_d_v3;
         }
-        //TODO:使用投影法将切向量投影到类光矢量
-        //if (t%10 == 0 )std::cout << std::endl << "ds^2 = " << ds2 << std::endl;
-        //if (t%10 == 0 )std::cout  << "dt/dlambda = " << v[3] << std::endl;
-        if (t % 10 == 0)new_light->push_back(Eigen::Vector3d(r[0] * M_ * std::sin(r[1]) * std::cos(r[2]),
-                            r[0] * M_ * std::sin(r[1]) * std::sin(r[2]) ,
-                            r[0] * M_ * std::cos(r[1])));
-        //std::cout << r[0] << std::endl;
+        Eigen::Vector3d e_r(
+            std::sin(r[1]) * std::cos(r[2]),
+            std::sin(r[1]) * std::sin(r[2]),
+            std::cos(r[1])
+        );
+        Eigen::Vector3d e_theta(
+            std::cos(r[1]) * std::cos(r[2]),
+            std::cos(r[1]) * std::sin(r[2]),
+            -std::sin(r[1])
+        );
+        Eigen::Vector3d e_phi(
+            -std::sin(r[2]),
+            std::cos(r[2]),
+            0.0
+        );
+        
+        double acc[4] = {0,0,0,0};
+        for (int i = 0; i < 4; ++i){
+            for (int j = 0; j < 4; ++j){
+                for (int k = 0; k < 4; ++k){
+                    //double theta = (r[1] == pi)?(1.5707):r[1];
+                    acc[i] -= gamma_sph_table[i][j][k](r[0], r[1], r[2], r[3]) * v[j] * v[k];
+                }
+            }
+            //std::cout << i << ' ' << r[i] << ' ';
+        }
+        v0 += step * (acc[0] * e_r + acc[1] * r[0] * e_theta + acc[2] * r[0] * std::sin(r[1]) * e_phi);
+        x0 += step * v0;
+        v[3] += acc[3] * step;
+        r[3] += v[3] * step;
+        //std::cout << x0 << ' ' << r[3] << std::endl;
+        new_light->push_back(x0 * M_);
+        new_l->push_back(v0.norm() * step * M_);
+        
     }
+    l_ = new_l;
     light = new_light;
+    //std::cout << light->size() << std::endl;
     return light;
 }
 sv Gauge_March::compute_l(){

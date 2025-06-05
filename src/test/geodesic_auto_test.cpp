@@ -1,3 +1,4 @@
+
 #include "matplotlibcpp.h"
 #include "geodesic.h"
 #include "gauge_march.h"
@@ -12,10 +13,11 @@ int main()
 {
 
     std::unique_ptr<RayMarch> gauge_march = std::make_unique<Gauge_March>();
+    gauge_march->M_ = 1;
     for (int i = 0; i < 5; ++i){
         //for (int j = 0; j < 2; ++j){
-        Eigen::Vector3d x0(3.3 + i * 0.2,0,0), v0(-0.000,0,1);
-        double step = 0.005;
+        Eigen::Vector3d x0(2.9 + i * 0.2,0,0), v0(-1.0,0.0000,1);
+        double step = 0.01;
         gauge_march->set_camera_pos(x0);
         gauge_march->set_v(v0);
         auto light = gauge_march->compute_light(step,nullptr);
@@ -24,7 +26,7 @@ int main()
         y.push_back(0);
         for (int i = 0; i < light->size(); ++i){
             x.push_back((*light)[i][0]);
-            y.push_back((*light)[i][1]);
+            y.push_back((*light)[i][2]);
             //std::cout << x.back() << ' ' << y.back() << std::endl;
         }
         plt::plot(x,y);

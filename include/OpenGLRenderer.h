@@ -18,7 +18,7 @@ public:
     GLuint get_VAO(){return VAO;};
 
     void initShaders_Bloom(const char* shaderDIR);//输入shader的位置
-    void enableBloom(bool enable);// 启用/禁用泛光
+    void enableBloom(bool enable){bloomEnabled = enable;};// 启用/禁用泛光
     void setBloomThreshold(float threshold);//泛光开始值
     void setBloomStrength(float strength) { this->bloomStrength = strength;};//泛光强度
 

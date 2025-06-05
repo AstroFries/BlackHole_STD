@@ -2,6 +2,7 @@
 #include "ray_march.h"
 #include "Schwarzschild_march.h"
 #include "OpenGLVolumeRender.h"
+#include "gauge_march.h"
 #include "bloom.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -15,8 +16,9 @@
 #include <iostream>
 #include <algorithm>
 
-#define X_SIGHT 2.0
-#define Y_SIGHT 1.5
+#define X_SIGHT 2.0*0.5
+#define Y_SIGHT 1.5*0.5
+#define PATH_N 32
 #define N 3
 #define L 2
 #define M 2
@@ -27,14 +29,16 @@ bool stop(double x, double y, double z){
     return x*x + y*y + z*z > 8*8;
 }
 int main() {
-    std::unique_ptr<RayMarch> RM0 = std::make_unique<Schwarzschild_BH_RayMarch>();
+    //std::unique_ptr<RayMarch> RM0 = std::make_unique<Schwarzschild_BH_RayMarch>();
     //std::unique_ptr<RayMarch> RM0 = std::make_unique<Flat_ST_RayMarch>();
+    
+    std::unique_ptr<RayMarch> RM0 = std::make_unique<Gauge_March>();
     RM0->M_ = 0.2;
     
-    double theta0 = 0.2*3.142, phi0 =  -0.805 * 1.571, r0 = 2.7;//摄像机位�?
-    double theta1 = 0.2*3.142, phi1 = -0.805 * 1.571;//摄像机视�?
-    const int width = 400*2;
-    const int height = 300*2;
+    double theta0 = 0.2*3.142, phi0 =  -0.205 * 1.571, r0 = 4.7;//摄像机位�??
+    double theta1 = 0.2*3.142, phi1 = -0.205 * 1.571;//摄像机视�??
+    const int width = 400*1;
+    const int height = 300*1;
     std::cout << "Window:  " << width << " x " << height << std::endl;
     Eigen::Vector3d x0(-r0*cos(theta0)*cos(phi0),-r0*sin(theta0)*cos(phi0),-r0*sin(phi0));
     Eigen::Vector3d v1(cos(theta1)*cos(phi1),sin(theta1)*cos(phi1),sin(phi1));
@@ -47,7 +51,7 @@ int main() {
     std::vector<std::vector<Eigen::Vector4f>> lights(width * height);
     OpenGLRenderer renderer(width, height, "OpenGL Renderer");
     renderer.initShaders_Bloom(SHADERS_DIR);
-    VolumeComputeShader shader(width, height, 64);//64为体渲染采样�?
+    VolumeComputeShader shader(width, height, PATH_N);//64为体渲染采样�??
     shader.init(SHADERS_DIR "/volume_compute.comp");
     
     //ImGui Init
@@ -77,19 +81,22 @@ int main() {
         //          g_rr is sqrt(1-2M/r)^{-1} instead of 1 which in R^3,the method is let the r_phi *= sqrt(1-2M/r)
         v0 = v1 + kx * vx + ky * vy;
         //std::cout << (v2-v1) << std::endl;
+        RM0->set_camera_pos(x0);
         RM0->set_v(v0);
-        light0 = RM0->compute_light(0.009,stop);
+        light0 = RM0->compute_light(0.075,stop);
         auto l0 = RM0->compute_l();
         for (int i = 0; i < light0->size(); ++i){
             if(pow((*light0)[i][2],2) > 0.1 * 0.1)continue;
+            if(pow((*light0)[i][0],2) + pow((*light0)[i][1],2)> 4 * 4)continue;
             Eigen::Vector4f point_i;
             for (int j = 0; j < 3;j++)point_i[j] = (*light0)[i][j];
             point_i[3] = (*l0)[i];
             lights[k].push_back(point_i);
             //if (lights[k].size() == 64)break;
         }
-        if (lights[k].size() > 64){
-            int k_delete = (lights[k].size()/64) + 1;
+        //int light_N = 32;
+        if (lights[k].size() > PATH_N){
+            int k_delete = (lights[k].size()/PATH_N) + 1;
             for (int j = lights[k].size() - 1; j >=0; j--){
                 if (j % k_delete != 0){
                     lights[k].erase(lights[k].begin() + j);
@@ -98,7 +105,7 @@ int main() {
                 }
             }
         }
-        while (lights[k].size() < 64) {
+        while (lights[k].size() < PATH_N) {
             lights[k].push_back(Eigen::Vector4f(0, 0, 0, 0));
         }
         //if (lights[k].size() >64)std::cout << lights[k].size() << std::endl;
@@ -131,6 +138,8 @@ int main() {
     // 3. 启动计算
 
     float time = 0;
+    int time_int = 0;
+    //shader.dispatch();
     while (!renderer.shouldClose()) {
         
         shader.dispatch();
@@ -157,14 +166,17 @@ int main() {
             shader.L_ = pow(10.f,LM);
         ImGui::End();
         ImGui::Render();
-
+        renderer.enableBloom(true);
         renderer.updatePixels(shader.getPowerTexture());
         
 
-        elapsed = std::chrono::high_resolution_clock::now() - end;
-        std::cout << "\r  -Compute Done " << elapsed.count() << "ms" << ' ' << std::flush;
-        end = std::chrono::high_resolution_clock::now();
-        time += elapsed.count() * 1e-4;
+        if (time_int % 30 == 0){
+            elapsed = std::chrono::high_resolution_clock::now() - end;
+            std::cout << "\r  -Compute Done " << 30 * 1000.f/elapsed.count() << "fps " << time << std::flush;
+            end = std::chrono::high_resolution_clock::now();
+        }
+        time += elapsed.count() * 1e-5;
+        time_int ++;
         //_sleep(100);
         renderer.render(false);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
