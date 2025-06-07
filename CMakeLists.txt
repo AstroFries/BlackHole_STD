@@ -131,3 +131,10 @@ target_link_libraries(SWZ_BH_REALTIME PRIVATE glad)
 target_include_directories(GR_LIB PRIVATE
     ${PROJECT_SOURCE_DIR}/python
 )
+
+#--------------------------------------------
+#OpenMP
+find_package(OpenMP REQUIRED)
+if (MSVC)
+    add_compile_options(/openmp)
+endif()

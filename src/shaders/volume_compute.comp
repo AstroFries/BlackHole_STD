@@ -78,25 +78,27 @@ float perlin(vec3 p) {
 }
 
 float fog_density(vec3 pos) {
-    float T = 3;
+    float T = 0.7;
     float density = 0;
     float r = length(pos);
-    float omega = 5/pow(r,2);
+    float omega = 5/sqrt(r-2*0.2);
     float r0 = 0.62;
     if (r < r0) return 0;
     for (int i = 0; i < 2; ++i){
-        float time_eff = time + i * T / 2 - float(int((time + i * T / 2)/T) * T);
+        float time_eff = time + i * T / 2 - float(int((time + i * T / 2)/T) * T) ;
+        time_eff +=0.2;
         float c = cos(time_eff * omega);
         float s = sin(time_eff * omega);
         vec3 pos1 = 
         mat3(
             c, -s, 0.0,
             s,  c, 0.0,
-            0.0, 0.0, 5.0
+            0.0, 0.0, 11.0
         ) * pos;
-        float n1 = perlin(pos1 * 12.5); // 0.05控制雾的块感
+        float n1 = perlin(pos1 * 5.5); // 0.05控制雾的块感
         float n2 = perlin(pos1 * 1.5);
-        density += (0.4 * n2 + 0.25 * n1 ) * pow(sin(time_eff/T * 3.1415),2);
+        time_eff -= 0.2;
+        density += (0.8 * n2 + 0.25 * n1 ) * pow(sin(time_eff/T * 3.1415),2);
     }
     float base = exp(-r*r*0.6 - pos.z * pos.z * 455) * pow(r-r0,1.6);
     density = density * base;
@@ -184,22 +186,29 @@ void main() {
         if (p.w <= 0.0) break; // w为路径长度，<=0表示无效
         // 沿路径采样
         vec3 r_color;
+        float tem_eff ;
         if (if_dopplerT == 1){
-            r_color = radiation_color(temperature/pow(length(p.xyz),1.2)* dopplerT(p.xyz, vc) )/255.0;
+            tem_eff = temperature/pow(length(p.xyz),1.2)* dopplerT(p.xyz, vc) ;
         }else{ 
-            r_color = radiation_color(temperature/pow(length(p.xyz),1.2) )/255.0;
+            tem_eff = temperature/pow(length(p.xyz),1.2) ;
         }
+        float density = fog_density(p.xyz);
+        //tem_eff *= (1.0 + density * 1e9);
+        r_color = radiation_color(tem_eff*(1.0 + density * 1e1) )/255.0 ;
         r_color.x = pow(r_color.x,2.2);
         r_color.y = pow(r_color.y,2.2);
         r_color.z = pow(r_color.z,2.2);
-        float density = fog_density(p.xyz);
+        
         if (if_dopplerI == 1){
             power += density * p.w * S *dopplerI(p.xyz, vc) * r_color;
         }else{  
             power += density * p.w * S * r_color;
         }
         //power += fog_density(p.xyz) * p.w * S * r_color;
-        S *= exp(- 15.2 * density * p.w * length(p.xyz));
+        S *= exp(- 5.2 * density * p.w * length(p.xyz));
+        if (S < 0.01){
+            break;
+        }
     }
     //pixel = 0.8;
     //if (power < 0)

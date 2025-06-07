@@ -1,5 +1,5 @@
 #include <cmath>
-#define a 0.9
+#define a 1.5
 using namespace std;
 template <int Index> double gamma_sph(double r, double theta, double phi, double t);
 template <> inline double gamma_sph<0>(double r, double theta, double phi, double t) { return (r*(pow(a, 2) + pow(r, 2) - 2*r) + (1 - r)*(pow(a, 2)*pow(cos(theta), 2) + pow(r, 2)))*(1.0*pow(a, 2) + 1.0*pow(r, 2) - 2.0*r)/((pow(a, 2)*pow(cos(theta), 2) + pow(r, 2))*pow(pow(a, 2) + pow(r, 2) - 2*r, 2)); }

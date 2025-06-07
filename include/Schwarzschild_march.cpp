@@ -4,7 +4,7 @@
 
 
 Schwarzschild_BH_RayMarch::Schwarzschild_BH_RayMarch(){
-    std::cout << "Ray Marching method: Schwarzschild Spacetime" <<std::endl;
+    //std::cout << "Ray Marching method: Schwarzschild Spacetime" <<std::endl;
 }
 
 svVector Schwarzschild_BH_RayMarch::compute_light(double step,bool stop(double,double,double)){

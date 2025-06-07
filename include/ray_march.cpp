@@ -3,7 +3,7 @@
 typedef std::shared_ptr<std::vector<Eigen::Vector3d>> svVector;
 
 RayMarch::RayMarch(){
-    std::cout << "A Ray Marching Class has been built." << std::endl;
+    //std::cout << "A Ray Marching Class has been built." << std::endl;
     light = std::make_shared<std::vector<Eigen::Vector3d>>();
 }
 void RayMarch::set_camera_pos(Eigen::Vector3d x0){

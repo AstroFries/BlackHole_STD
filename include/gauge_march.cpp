@@ -2,6 +2,7 @@
 #include "output_gauge_sph_inv.h"
 #include "output_christoffel_sph.h"
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 
 typedef double (*g_sph_func)(double, double, double, double);
@@ -40,7 +41,7 @@ constexpr gamma_sph_func gamma_sph_table[4][4][4] = {
 };
 
 Gauge_March::Gauge_March(){
-    std::cout << "Ray Marching method: Default Spacetime" <<std::endl;
+    //std::cout << "Ray Marching method: Default Spacetime" <<std::endl;
 }
 
 inline void xyz_to_rtp(Eigen::Vector3d x0, double* r, double* theta, double* phi){
@@ -109,7 +110,8 @@ svVector Gauge_March::compute_light(double step,bool stop(double,double,double))
         xyz_to_rtp(x0, r+0, r+1, r+2);
         xyz_to_rtp(x0 + v0 * 1e-6, v+0, v+1, v+2);
         for (int i = 0; i < 3; ++i)v[i] = (v[i] - r[i]) * 1e6;
-        if (r[0] < 2.05)break;
+        if (r[0] < 1.05)break;
+        if (a*a + r[0] * r[0] - 2 * r[0] < 0.1)break;
         double ds2 = 0.0;
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
@@ -141,7 +143,8 @@ svVector Gauge_March::compute_light(double step,bool stop(double,double,double))
             std::cos(r[2]),
             0.0
         );
-        
+        double step1 = (pow(x0[2] * M_,2)<0.12*0.12)?0.2*step:step;
+        step1 *= min(pow(x0.norm()/5.0,2),1.0);
         double acc[4] = {0,0,0,0};
         for (int i = 0; i < 4; ++i){
             for (int j = 0; j < 4; ++j){
@@ -152,14 +155,15 @@ svVector Gauge_March::compute_light(double step,bool stop(double,double,double))
             }
             //std::cout << i << ' ' << r[i] << ' ';
         }
-        v0 += step * (acc[0] * e_r + acc[1] * r[0] * e_theta + acc[2] * r[0] * std::sin(r[1]) * e_phi);
-        x0 += step * v0;
-        v[3] += acc[3] * step;
-        r[3] += v[3] * step;
+        v0 += step1 * (acc[0] * e_r + acc[1] * r[0] * e_theta + acc[2] * r[0] * std::sin(r[1]) * e_phi);
+        x0 += step1 * v0;
+        v[3] += acc[3] * step1;
+        r[3] += v[3] * step1;
         //std::cout << x0 << ' ' << r[3] << std::endl;
-        new_light->push_back(x0 * M_);
-        new_l->push_back(v0.norm() * step * M_);
-        
+        if (pow(x0[2] * M_ ,2) <0.2 ){
+            new_light->push_back(x0 * M_);
+            new_l->push_back(v0.norm() * step1 * M_);
+        }
     }
     l_ = new_l;
     light = new_light;

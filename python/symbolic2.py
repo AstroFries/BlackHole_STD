@@ -47,11 +47,13 @@ g_spherical = sp.Matrix([
     [0, 0, r**2 * sp.sin(theta)**2, 0],
     [0, 0, 0, -1]
 ])
+
+
 g_spherical = sp.Matrix([
-    [1/(1-2/r), 0, 0, 0],
+    [1/(1+2/r), 0, 0, 0],
     [0, r**2, 0, 0],
     [0, 0, r**2 * sp.sin(theta)**2, 0],
-    [0, 0, 0, -(1-2/r)]
+    [0, 0, 0, -(1+2/r)]
 ])
 g_spherical = sp.Matrix([
     [rho2 / Delta,                        0,                                    0,                               0],
