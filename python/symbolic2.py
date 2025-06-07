@@ -49,17 +49,18 @@ g_spherical = sp.Matrix([
 ])
 
 
-g_spherical = sp.Matrix([
-    [1/(1+2/r), 0, 0, 0],
-    [0, r**2, 0, 0],
-    [0, 0, r**2 * sp.sin(theta)**2, 0],
-    [0, 0, 0, -(1+2/r)]
-])
+
 g_spherical = sp.Matrix([
     [rho2 / Delta,                        0,                                    0,                               0],
     [0,                              rho2,                                    0,                               0],
     [0,                                  0,  (r**2 + a**2 + 2*a**2*r*sp.sin(theta)**2 / rho2) * sp.sin(theta)**2,   -2*a*r*sp.sin(theta)**2 / rho2],
     [0,                                  0,                                    -2*a*r*sp.sin(theta)**2 / rho2,      -(1 - 2*r/rho2)]
+])
+g_spherical = sp.Matrix([
+    [1/(1-2/r), 0, 0, 0],
+    [0, r**2, 0, 0],
+    [0, 0, r**2 * sp.sin(theta)**2, 0],
+    [0, 0, 0, -(1-2/r)]
 ])
 print(g_spherical.applyfunc(trig_to_xyz))
 #g_cartesian = J_sp.inv().T * g_spherical.applyfunc(trig_to_xyz) * J_sp.inv()

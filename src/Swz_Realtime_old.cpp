@@ -35,10 +35,10 @@ int main() {
     //std::unique_ptr<RayMarch> RM0 = std::make_unique<Gauge_March>();
     RM0->M_ = 0.2;
     
-    double theta0 = 0.2*3.142, phi0 =  -0.305 * 1.571, r0 = 4.7;//�����λ???
-    double theta1 = 0.2*3.142, phi1 = -0.305 * 1.571;//�������???
-    const int width = 400*1;
-    const int height = 300*1;
+    double theta0 = 0.2*3.142, phi0 =  -0.105 * 1.571, r0 = 4.7;//�����λ???
+    double theta1 = 0.2*3.142, phi1 = -0.105 * 1.571;//�������???
+    const int width = 400*4;
+    const int height = 300*4;
     std::cout << "Window:  " << width << " x " << height << std::endl;
     Eigen::Vector3d x0(-r0*cos(theta0)*cos(phi0),-r0*sin(theta0)*cos(phi0),-r0*sin(phi0));
     Eigen::Vector3d v1(cos(theta1)*cos(phi1),sin(theta1)*cos(phi1),sin(phi1));
