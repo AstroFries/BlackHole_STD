@@ -11,22 +11,6 @@ X = sp.Matrix([x_, y_, z_,t_])
 vars = (r, theta, phi,t_)
 J = X.jacobian(vars)  # 4x4
 
-r_expr = sp.sqrt(x**2 + y**2 + z**2)
-
-def trig_to_xyz(expr):
-    expr = expr.replace(sp.sin(theta), sp.sqrt(x**2 + y**2) / sp.sqrt(x**2 + y**2 + z**2))
-    expr = expr.replace(sp.cos(theta), z / sp.sqrt(x**2 + y**2 + z**2))
-    expr = expr.replace(sp.sin(phi), y / sp.sqrt(x**2 + y**2))
-    expr = expr.replace(sp.cos(phi), x / sp.sqrt(x**2 + y**2))
-    expr = expr.replace(r, sp.sqrt(x**2 + y**2 + z**2))
-    return expr
-
-J_sp = J.applyfunc(trig_to_xyz)
-#print(J)
-#print(J_sp)
-
-
-
 a = sp.Symbol('a')
 #a = sp.Rational(1,3)
 rho2 = r**2 + a**2 * sp.cos(theta)**2
@@ -48,21 +32,19 @@ g_spherical = sp.Matrix([
     [0, 0, 0, -1]
 ])
 
-
-
-g_spherical = sp.Matrix([
-    [rho2 / Delta,                        0,                                    0,                               0],
-    [0,                              rho2,                                    0,                               0],
-    [0,                                  0,  (r**2 + a**2 + 2*a**2*r*sp.sin(theta)**2 / rho2) * sp.sin(theta)**2,   -2*a*r*sp.sin(theta)**2 / rho2],
-    [0,                                  0,                                    -2*a*r*sp.sin(theta)**2 / rho2,      -(1 - 2*r/rho2)]
-])
 g_spherical = sp.Matrix([
     [1/(1-2/r), 0, 0, 0],
     [0, r**2, 0, 0],
     [0, 0, r**2 * sp.sin(theta)**2, 0],
     [0, 0, 0, -(1-2/r)]
 ])
-print(g_spherical.applyfunc(trig_to_xyz))
+g_spherical = sp.Matrix([
+    [rho2 / Delta,                        0,                                    0,                               0],
+    [0,                              rho2,                                    0,                               0],
+    [0,                                  0,  (r**2 + a**2 + 2*a**2*r*sp.sin(theta)**2 / rho2) * sp.sin(theta)**2,   -2*a*r*sp.sin(theta)**2 / rho2],
+    [0,                                  0,                                    -2*a*r*sp.sin(theta)**2 / rho2,      -(1 - 2*r/rho2)]
+])
+#print(g_spherical.applyfunc(trig_to_xyz))
 #g_cartesian = J_sp.inv().T * g_spherical.applyfunc(trig_to_xyz) * J_sp.inv()
 #g_cartesian = sp.simplify(g_cartesian)
 
@@ -100,6 +82,7 @@ Gamma_sph = {}
 
 print("C语言函数输出至output_gauge_sph_inv.h")
 with open("python/output_gauge_sph_inv.h", "w", encoding="utf-8") as f:
+    f.write(f"#define a 0.9\n")
     f.write(f"#include <cmath>\n")
     f.write(f"using namespace std;\n")
     f.write(f"template <int Index> double g_sph(double r, double theta, double phi, double t);\n")
@@ -137,6 +120,7 @@ for i in range(4):
 print("C语言球坐标Christoffel函数输出至output_christoffel_sph.h")
 with open("python/output_christoffel_sph.h", "w", encoding="utf-8") as f:
     f.write(f"#include <cmath>\n")
+    f.write(f"#define a 0.9\n")
     f.write(f"using namespace std;\n")
     f.write(f"template <int Index> double gamma_sph(double r, double theta, double phi, double t);\n")
     for i in range(4):
@@ -144,6 +128,28 @@ with open("python/output_christoffel_sph.h", "w", encoding="utf-8") as f:
             for k in range(4):
                 func_name = f"template <> inline double gamma_sph<{16 * i + 4 * j + k}>"
                 args = "double r, double theta, double phi, double t"
-                expr_c = sp.ccode(Gamma_sph[(i, j, k)])
+                simpified_expr = sp.simplify(Gamma_sph[(i, j, k)])
+                #expr_c = sp.ccode(Gamma_sph[(i, j, k)])
+                expr_c = sp.ccode(simpified_expr)
                 f.write(f"{func_name}({args})"+" { return "+expr_c+"; }\n")
                 #print(f"inline double {func_name}({args})"+" { return "+expr_c+"; }")
+            
+print("C语言球坐标Christoffel函数输出至output_christoffel_sph.tex")
+with open("python/output_christoffel_sph.tex", "w", encoding="utf-8") as f:
+    f.write(r"\documentclass[a4paper, 12pt]{article}"+"\n")
+    f.write(r"\usepackage{ctex}"+"\n")
+    f.write(r"\usepackage{amsfonts}"+"\n")
+    f.write(r"\usepackage{graphicx}"+"\n")
+    f.write(r"\usepackage{amsmath,amssymb,amsfonts}"+"\n")
+    f.write(r"\begin{document}"+"\n")
+    for i in range(4):
+        for j in range(4):
+            for k in range(4):
+                func_name = f"template <> inline double gamma_sph<{16 * i + 4 * j + k}>"
+                args = "double r, double theta, double phi, double t"
+                simpified_expr = sp.simplify(Gamma_sph[(i, j, k)])
+                #expr_c = sp.ccode(Gamma_sph[(i, j, k)])
+                expr_tex = sp.latex(simpified_expr)
+                f.write(r"\[\Gamma"+r"^{" + f"{i}" +r"}_{\ " + f"{j}{k}" +r"}=" +expr_tex+r"\]"+"\n")
+    
+    f.write(r"\end{document}"+"\n")

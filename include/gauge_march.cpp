@@ -110,8 +110,8 @@ svVector Gauge_March::compute_light(double step,bool stop(double,double,double))
         xyz_to_rtp(x0, r+0, r+1, r+2);
         xyz_to_rtp(x0 + v0 * 1e-6, v+0, v+1, v+2);
         for (int i = 0; i < 3; ++i)v[i] = (v[i] - r[i]) * 1e6;
-        if (r[0] < 1.05)break;
-        //if (a*a + r[0] * r[0] - 2 * r[0] < 0.1)break;
+        //if (r[0] < 1.05)break;
+        if (a*a + r[0] * r[0] - 2 * r[0] < 0.1)break;
         double ds2 = 0.0;
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)

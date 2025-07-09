@@ -122,7 +122,7 @@
     我采用的解决方法如下：\par
     问题1:通过python的sympy库进行符号计算，然后用其ccode功能把符号计算结果导出到$.h$的cpp头文件。\par
     问题2:解决方案是在笛卡尔坐标系$Oxyz$下进行计算。但是我们没有直接计算由xyz显示确定的联络，而是计算了
-    由$r,\theta,\phi,t$给定的非平直时空球坐标联络（直接符号计算及其费时），再减去平直时空在$r,\theta,\phi,t$下的联络得到$\widetilde{\Gamma}$ .
+    由$r,\theta,\phi,t$给定的非平直时空球坐标联络（直接在xyzt下符号计算及其费时），再减去平直时空在$r,\theta,\phi,t$下的联络得到$\widetilde{\Gamma}$ .
     可以证明,$x,y,z,t$对$\lambda$的二阶导，可以直接通过由假联络$\widetilde{\Gamma}$在$r,\theta,\phi,t$
     下计算的坐标的二阶导坐标变换回来(把计算得到的$(r'',\theta'',\phi'',t'')$当作矢量)。
     (如果直接用球坐标下的联络计算，我们还需要面临坐标变换带来的加速度。这里取假联络实际上相当于
@@ -354,7 +354,7 @@
         \begin{minipage}[t]{0.48\textwidth}
             \centering
             \includegraphics[width=0.95\textwidth]{photo/ip0.png}
-            \caption{负值量施瓦西“黑洞”}
+            \caption{负质量施瓦西“黑洞”}
         \end{minipage}
         \hfill
         \begin{minipage}[t]{0.48\textwidth}

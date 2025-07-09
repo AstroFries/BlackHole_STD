@@ -28,7 +28,7 @@ bool VolumeComputeShader::init(const char* computeShaderPath) {
     glGenTextures(1, &powerTex_);
     glBindTexture(GL_TEXTURE_2D, powerTex_);
 
-    // 设置 Mipmap 缩小过滤器（关键）
+    // 设置 Mipmap 缩小过滤器（关键�?
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -39,7 +39,7 @@ bool VolumeComputeShader::init(const char* computeShaderPath) {
     // 创建纹理内存
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_, height_, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-    // 生成 Mipmap（只有在 min filter 支持 mipmap 时才有效）
+    // 生成 Mipmap（只有在 min filter 支持 mipmap 时才有效�?
     glGenerateMipmap(GL_TEXTURE_2D);
 
     GLint success;
@@ -63,6 +63,11 @@ void VolumeComputeShader::uploadPaths(const std::vector<std::vector<Eigen::Vecto
     }
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, pathSSBO_);
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, flat.size() * sizeof(Eigen::Vector4f), flat.data());
+}
+void VolumeComputeShader::uploadPathsFromSSBO(GLuint PathSSBO){
+    
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, PathSSBO);
+    pathSSBO_ = PathSSBO;
 }
 
 void VolumeComputeShader::dispatch() {

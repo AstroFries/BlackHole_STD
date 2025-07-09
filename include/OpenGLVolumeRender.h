@@ -13,7 +13,7 @@ public:
 
     // 上传路径数据（每像素最多maxPaths条，每条vec4(x,y,z,length)）
     void uploadPaths(const std::vector<std::vector<Eigen::Vector4f>>& allPaths);
-
+    void uploadPathsFromSSBO(GLuint PathSSBO);
     // 启动计算
     void dispatch();
 

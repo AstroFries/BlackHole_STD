@@ -5,7 +5,7 @@ layout(local_size_x = 16, local_size_y = 16) in;
 const int MAX_PATHS = 32;
 
 layout(std430, binding = 0) buffer PathBuffer {
-    vec4 paths[]; // 每像素64条路径，按像素块排列
+    vec4 paths[]; // 每像素32条路径，按像素块排列
 };
 
 layout(rgba32f, binding = 1) uniform image2D powerImage; // 输出Power
@@ -81,26 +81,28 @@ float fog_density(vec3 pos) {
     float T = 0.7;
     float density = 0;
     float r = length(pos);
-    float omega = 5/sqrt(r-2*0.2);
+    float omega = 4/r/sqrt(r-2*0.2);
     float r0 = 0.62;
     if (r < r0) return 0;
-    for (int i = 0; i < 2; ++i){
-        float time_eff = time + i * T / 2 - float(int((time + i * T / 2)/T) * T) ;
-        time_eff +=0.2;
-        float c = cos(time_eff * omega);
-        float s = sin(time_eff * omega);
+    int N = 3;
+    for (int i = 0; i < N; ++i){
+        float time_eff = time + i * T / N - float(int((time + i * T / N)/T) * T) ;
+        float phi_0 = 0.0;
+        time_eff +=phi_0;
+        float c = cos(time_eff * omega );
+        float s = sin(time_eff * omega );
         vec3 pos1 = 
         mat3(
             c, -s, 0.0,
             s,  c, 0.0,
-            0.0, 0.0, 11.0
+            0.0, 0.0, 1.0
         ) * pos;
-        float n1 = perlin(pos1 * 5.5); // 0.05控制雾的块感
-        float n2 = perlin(pos1 * 1.5);
-        time_eff -= 0.2;
-        density += (0.8 * n2 + 0.25 * n1 ) * pow(sin(time_eff/T * 3.1415),2);
+        float n1 = perlin(pos1 * 18.5); // 0.05控制雾的块感
+        float n2 = perlin(pos1*pow(r,0.5) * 2.5);
+        time_eff -= phi_0;
+        density += (0.2 * n2 + 0.65 * n1*n2 ) * pow(sin(time_eff/T * 3.1415),2);
     }
-    float base = exp(-r*r*0.6 - pos.z * pos.z * 455) * pow(r-r0,1.6);
+    float base = exp(-r*r*0.6 - pos.z * pos.z * 655) * pow(r-r0,1.6);
     density = density * base;
     return density;
 }
@@ -195,6 +197,7 @@ void main() {
         float density = fog_density(p.xyz);
         //tem_eff *= (1.0 + density * 1e9);
         r_color = radiation_color(tem_eff*(1.0 + density * 1e1) )/255.0 ;
+        //r_color = vec3(1,0,0);
         r_color.x = pow(r_color.x,2.2);
         r_color.y = pow(r_color.y,2.2);
         r_color.z = pow(r_color.z,2.2);
@@ -205,7 +208,7 @@ void main() {
             power += density * p.w * S * r_color;
         }
         //power += fog_density(p.xyz) * p.w * S * r_color;
-        S *= exp(- 5.2 * density * p.w * length(p.xyz));
+        S *= 1+(- 5.2 * density * p.w * length(p.xyz));
         if (S < 0.01){
             break;
         }
@@ -220,8 +223,9 @@ void main() {
     power *= L;
     for (int i = 0; i < 3; ++i){
         if (power[i] > 1)power[i] = 1;
+        if (power[i] < 0)power[i] = 0;
         power[i] = pow(power[i],1/2.2);
     }
-    //imageStore(powerImage, pixel, vec4(test,0,0, 1));
+    //imageStore(powerImage, pixel, vec4(1,0,0, 1));
     imageStore(powerImage, pixel, vec4(power, 1));
 }
